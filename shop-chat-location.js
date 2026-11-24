@@ -4,7 +4,7 @@
   'use strict';
   // The app redraws its views with innerHTML, so #shop-root is created again every time the
   // Store tab is opened. We therefore mount (and re-mount) whenever a fresh #shop-root appears.
-  const API = (window.AZ_SHOP_API || ((location.port === '4000' || location.port === '8080') ? location.origin : 'http://localhost:4000')).replace(/\/$/, '');
+  const API = (window.AZ_SHOP_API || window.AZS_API_BASE || ((location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? ((location.port === '8080' || location.port === '4000') ? location.origin : 'http://localhost:8080') : (window.AZ_LIVE_API || ''))).replace(/\/+$/, '');
   const LIVE_MINUTES = 15;
   const S = { token: '', me: null, quota: null, cats: [], cat: '', q: '', page: 1,
               socket: null, chat: null, convs: [], watch: null, shareConv: 0, liveBox: null };
@@ -31,6 +31,36 @@
     return s < 172800 ? 'Yesterday' : Math.floor(s / 86400) + ' days ago';
   }
   const hhmm = (iso) => when(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  function warnBox(title, message, confirmLabel) {
+    return new Promise((resolve) => {
+      const old = document.getElementById("azs-warn-overlay");
+      if (old) old.remove();
+      const close = (ans) => {
+        const el = document.getElementById("azs-warn-overlay");
+        if (el) el.remove();
+        resolve(ans);
+      };
+      const overlay = h("div", {
+        id: "azs-warn-overlay",
+        class: "azs-overlay",
+        onclick: (e) => { if (e.target === overlay) close(false); }
+      },
+        h("div", { class: "azs-warn-box", role: "alertdialog" },
+          h("div", { class: "azs-warn-head" },
+            h("span", { class: "azs-warn-title" }, "\u26A0\uFE0F " + (title || "Notice")),
+            h("button", { class: "azs-x", onclick: () => close(false) }, "\u00D7")
+          ),
+          h("p", { class: "azs-warn-body" }, message || ""),
+          h("div", { class: "azs-warn-actions" },
+            confirmLabel ? h("button", { class: "azs-btn azs-ghost", onclick: () => close(false) }, "Cancel") : null,
+            h("button", { class: "azs-btn", onclick: () => close(true) }, confirmLabel || "OK")
+          )
+        )
+      );
+      document.body.append(overlay);
+    });
+  }
+
   function toast(msg) {
     const t = h('div', { class: 'azs azs-toast', role: 'status' }, msg);
     document.body.append(t);
@@ -415,10 +445,36 @@
     stopShare(); hideLive();
     if (S.chat) { S.chat.ui.remove(); S.chat = null; }
   }
+  function updateChatBadge() {
+    const unread = (S.convs || []).reduce((sum, c) => sum + Number(c.unread_count || c.unread || 0), 0);
+    const btn = document.getElementById("azs-chats-btn");
+    if (!btn) return;
+    let badge = btn.querySelector(".azs-badge-count");
+    if (unread > 0) {
+      if (!badge) {
+        badge = h("span", { class: "azs-badge-count" });
+        btn.append(badge);
+      }
+      badge.textContent = unread > 99 ? "99+" : String(unread);
+    } else if (badge) {
+      badge.remove();
+    }
+  }
+  async function syncUnread() {
+    if (!S.token) return;
+    try {
+      const rows = await api("/api/conversations");
+      if (Array.isArray(rows)) {
+        S.convs = rows;
+        updateChatBadge();
+      }
+    } catch (_) {}
+  }
+
   async function loadConvs() {
     if (!S.chat) return;
     try {
-      S.convs = await api('/api/conversations');
+      S.convs = await api('/api/conversations'); updateChatBadge();
       S.chat.clist.textContent = '';
       if (!S.convs.length) S.chat.clist.append(h('p', { class: 'azs-empty' }, 'No chats yet. Tap Contact on an ad.'));
       S.convs.forEach((c) => S.chat.clist.append(h('div', { class: 'azs-conv' + (S.chat.id === c.id ? ' on' : ''),
