@@ -4,7 +4,7 @@
   'use strict';
   // The app redraws its views with innerHTML, so #shop-root is created again every time the
   // Store tab is opened. We therefore mount (and re-mount) whenever a fresh #shop-root appears.
-  const API = (window.AZ_SHOP_API || window.AZS_API_BASE || ((location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? ((location.port === '8080' || location.port === '4000') ? location.origin : 'http://localhost:8080') : (window.AZ_LIVE_API || ''))).replace(/\/+$/, '');
+  const API = /*azs-v2*/(window.AZ_SHOP_API || ((location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? (location.port === '8080' ? location.origin : 'http://localhost:8080') : 'http://localhost:8080')).replace(/\/$/, '');
   const LIVE_MINUTES = 15;
   const S = { token: '', me: null, quota: null, cats: [], cat: '', q: '', page: 1,
               socket: null, chat: null, convs: [], watch: null, shareConv: 0, liveBox: null };
@@ -81,11 +81,41 @@
     const sheet = h('div', { class: 'azs-sheet', role: 'dialog', 'aria-label': title });
     const ov = h('div', { class: 'azs-overlay', onclick: (e) => { if (e.target === ov) close(); } }, sheet);
     const close = () => { ov.remove(); };
-    sheet.append(h('h3', {}, title, h('button', { class: 'azs-x', 'aria-label': 'Close', onclick: close }, '\u00D7')), ...content);
+    sheet.append(h('h3', {}, title, h('button', { class: 'azs-x', 'aria-label': 'Close', onclick: close }, '\u00D7')), ...content.flat(Infinity).filter((x) => x !== "" && x != null));
     document.body.append(ov);
     return { sheet, close };
   }
  
+  // ---------- warning dialog (replaces browser confirm/prompt) ----------
+  function askBox(message, opts) {
+    opts = opts || {};
+    return new Promise((resolve) => {
+      const input = opts.input ? h('input', { class: 'azs-input', maxlength: 200, placeholder: opts.placeholder || '' }) : null;
+      const ov = h('div', { class: 'azs-warn-overlay' });
+      const done = (v) => { ov.remove(); resolve(v); };
+      const box = h('div', { class: 'azs-warn-box', role: 'alertdialog' },
+        h('div', { class: 'azs-warn-icon' }, '\u26A0\uFE0F'),
+        h('p', {}, message), input,
+        h('div', { class: 'azs-row' },
+          h('button', { class: 'azs-btn azs-ghost azs-contact', onclick: () => done(opts.input ? null : false) }, 'Cancel'),
+          h('button', { class: 'azs-btn azs-contact' + (opts.danger ? ' azs-danger' : ''), onclick: () => done(opts.input ? input.value.trim() : true) }, opts.ok || 'OK')));
+      ov.append(box); document.body.append(ov);
+      if (input) input.focus();
+    });
+  }
+  // ---------- chat notification badge ----------
+  function renderBadge() {
+    const b = document.getElementById('azs-chats-btn');
+    if (!b) return;
+    let c = b.querySelector('.azs-badge-count');
+    const n = S.unread || 0;
+    if (n > 0) {
+      if (!c) { c = document.createElement('span'); c.className = 'azs-badge-count'; b.append(c); }
+      c.textContent = n > 99 ? '99+' : String(n);
+    } else if (c) c.remove();
+  }
+  setInterval(renderBadge, 1500);
+
   // ---------- map (Leaflet, loaded only when needed) ----------
   function loadLeaflet() {
     if (window.L) return Promise.resolve();
@@ -203,7 +233,7 @@
     ui.actions.append(h('button', { class: 'azs-btn', onclick: openPost }, '+ Sell'));
     if (S.me) {
       ui.actions.append(
-        h('button', { class: 'azs-btn azs-ghost', onclick: openChats }, 'Chats'),
+        h('button', { id: 'azs-chats-btn', class: 'azs-btn azs-ghost', onclick: () => openChats() }, 'Chats'),
         h('button', { class: 'azs-btn azs-ghost', onclick: openMine }, 'My ads'));
       if (S.me.role === 'admin') ui.actions.append(h('button', { class: 'azs-btn azs-ghost', onclick: openAdmin }, 'Admin'));
       ui.actions.append(h('button', { class: 'azs-btn azs-ghost', onclick: logout }, 'Log out'));
@@ -278,7 +308,7 @@
   }
   async function report(id) {
     if (!S.me) return needLogin(() => report(id));
-    const reason = window.prompt('What is wrong with this ad?');
+    const reason = await askBox('What is wrong with this ad?', { input: true, placeholder: 'Reason', ok: 'Report', danger: true });
     if (!reason) return;
     try { await api('/api/listings/' + id + '/report', { method: 'POST', body: { reason } }); toast('Thanks, the admin will review it'); }
     catch (e) { toast(e.message); }
@@ -346,7 +376,7 @@
         h('div', {}, r.title, h('small', {}, money(r.price) + (r.is_sample ? ' \u2022 sample' : ''))),
         h('span', { class: 'azs-status' }, r.status),
         r.status === 'removed' ? '' : h('button', { class: 'azs-link', onclick: async () => {
-          if (!window.confirm('Remove this ad?')) return;
+          if (!(await askBox('Remove this ad?', { danger: true, ok: 'Remove' }))) return;
           await api('/api/listings/' + r.id, { method: 'DELETE' }); m.close(); openMine(); loadListings(true);
         } }, 'Remove'))) : h('p', { class: 'azs-empty' }, 'You have no ads yet.'));
     } catch (e) { toast(e.message); }
@@ -357,6 +387,7 @@
     try {
       const d = await api('/api/admin/overview');
       const box = h('div');
+      box.append = ((raw) => (...a) => raw(...a.flat(Infinity)))(box.append.bind(box));
       const m = modal('Admin', box);
       const act = (fn) => async () => { try { await fn(); m.close(); openAdmin(); loadListings(true); } catch (e) { toast(e.message); } };
       box.append(h('p', { class: 'azs-sub' }, 'Ads waiting for approval (' + d.listings.length + ')'),
@@ -394,7 +425,7 @@
     if (S.socket) return;
     S.socket = window.io(API, { auth: { token: S.token } });
     S.socket.on('chat:message', (m) => {
-      if (S.chat && S.chat.id === m.conversation_id) { addMsg(m); } else toast('New message');
+      if (S.chat && S.chat.id === m.conversation_id) { addMsg(m); } else if (S.me && m.sender_id !== S.me.id) { S.unread = (S.unread || 0) + 1; renderBadge(); toast('New message'); try { navigator.vibrate && navigator.vibrate(120); } catch (e) { /* ignore */ } }
       if (S.chat) loadConvs();
     });
     S.socket.on('chat:live', (d) => {
@@ -445,7 +476,7 @@
     stopShare(); hideLive();
     if (S.chat) { S.chat.ui.remove(); S.chat = null; }
   }
-  function updateChatBadge() {
+  function updateChatBadge() { return;
     const unread = (S.convs || []).reduce((sum, c) => sum + Number(c.unread_count || c.unread || 0), 0);
     const btn = document.getElementById("azs-chats-btn");
     if (!btn) return;
@@ -485,7 +516,7 @@
     if (!S.chat) return;
     if (S.chat.id !== id) hideLive();
     S.chat.id = id;
-    S.chat.ui.classList.add('in-thread');
+    S.chat.ui.classList.add('in-thread'); S.unread = 0; renderBadge();
     const c = S.convs.find((x) => x.id === id);
     S.chat.title.textContent = c ? c.other_name + ' \u2022 ' + c.title : 'Chat';
     S.chat.msgs.textContent = '';
@@ -519,11 +550,11 @@
     S.chat.shareBtn.textContent = on ? '\u23F9 Stop' : '\u{1F4CD}';
     S.chat.shareBtn.title = on ? 'Stop sharing location' : 'Share live location';
   }
-  function toggleShare() {
+  async function toggleShare() {
     if (S.watch != null) { stopShare(); return; }
     if (!S.chat || !S.chat.id) { toast('Open a chat first'); return; }
     if (!navigator.geolocation) { toast('Location is not supported on this device'); return; }
-    if (!window.confirm('Share your live location with this person for ' + LIVE_MINUTES + ' minutes? You can stop any time.')) return;
+    if (!(await askBox('Share your live location with this person for ' + LIVE_MINUTES + ' minutes? You can stop any time.', { ok: 'Share' }))) return;
     const cid = S.chat.id; let first = true; let last = 0;
     S.shareConv = cid;
     S.watch = navigator.geolocation.watchPosition((p) => {
