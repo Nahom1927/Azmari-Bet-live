@@ -1,32 +1,27 @@
-/* Azmari Bet - Shop / chat / location.  Everything is scoped to .azs and .azs-*,
-   so no other section of the app is touched.
-   COLOUR TOKENS: sampled from your Store screenshot. If your global.css uses
-   slightly different values, change ONLY these 9 lines to match. */
-.azs, .azs-overlay, .azs-chat, .azs-toast {
+.azs, .azs-overlay, .azs-chat, .azs-toast, .azs-warn-box {
   --azs-bg: #070d24;
   --azs-card: #0d1635;
   --azs-card-2: #131f46;
   --azs-line: rgba(255, 255, 255, .09);
   --azs-text: #e8f0ff;
   --azs-muted: #8da2c8;
-  --azs-accent: #1fc7f5;      /* cyan: Contact button, icon tiles */
-  --azs-price: #3aa9ff;       /* ETB price text */
-  --azs-ok: #14b86a;          /* Verified badge */
-  --azs-bad: #e5484d;         /* report flag, errors */
+  --azs-accent: #1fc7f5;
+  --azs-price: #3aa9ff;
+  --azs-ok: #14b86a;
+  --azs-bad: #e5484d;
+  --azs-warn: #f5b700;
   --azs-on-accent: #04202b;
   color: var(--azs-text);
   font-family: inherit;
   box-sizing: border-box;
 }
-.azs *, .azs-overlay *, .azs-chat *, .azs-toast * { box-sizing: border-box; }
- 
-/* ---------- page ---------- */
-.azs { padding: 14px 12px 20px; margin: 0; color: var(--azs-text); background: var(--azs-bg); border-radius: 16px; min-height: 60vh; }
+.azs *, .azs-overlay *, .azs-chat *, .azs-toast *, .azs-warn-box * { box-sizing: border-box; }
+.azs { padding: 14px 12px 24px; margin: 0; color: var(--azs-text); background: var(--azs-bg); border-radius: 16px; min-height: 60vh; }
 .azs .azs-h { color: var(--azs-text); }
-.azs-card, .azs-sheet, .azs-toast { color: var(--azs-text); }
+.azs-card, .azs-sheet, .azs-toast, .azs-warn-box { color: var(--azs-text); }
 .azs-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .azs-h { margin: 0; font-size: 22px; }
-.azs-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.azs-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .azs-search {
   width: 100%; margin: 12px 0 10px; padding: 12px 14px; border-radius: 12px; font-size: 15px;
   color: var(--azs-text); background: var(--azs-card); border: 1px solid var(--azs-line);
@@ -42,18 +37,19 @@
 .azs-chip.on { background: var(--azs-accent); color: var(--azs-on-accent); border-color: var(--azs-accent); }
 .azs-sub { margin: 14px 0 8px; font-size: 13px; color: var(--azs-muted); }
 .azs-empty { color: var(--azs-muted); grid-column: 1 / -1; text-align: center; padding: 30px 0; }
- 
-/* ---------- buttons ---------- */
 .azs-btn {
-  padding: 9px 14px; border: 0; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px;
-  color: var(--azs-on-accent); background: var(--azs-accent);
+  position: relative; padding: 9px 14px; border: 0; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px;
+  color: var(--azs-on-accent); background: var(--azs-accent); display: inline-flex; align-items: center; gap: 6px;
 }
 .azs-btn:disabled { opacity: .5; cursor: default; }
 .azs-ghost { color: var(--azs-text); background: var(--azs-card-2); border: 1px solid var(--azs-line); }
 .azs-danger { background: var(--azs-bad); color: #fff; }
 .azs-link { background: none; border: 0; padding: 0; color: var(--azs-accent); text-decoration: underline; cursor: pointer; font-size: 13px; }
- 
-/* ---------- ad cards (2 columns on phones, more on wide screens) ---------- */
+.azs-badge-count {
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  background: var(--azs-bad); color: #fff; font-size: 11px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+}
 .azs-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 700px)  { .azs-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .azs-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -70,10 +66,8 @@
 .azs-contact { flex: 1; }
 .azs-flag { width: 38px; border-radius: 10px; border: 0; cursor: pointer; color: var(--azs-bad); background: rgba(229, 72, 77, .15); font-size: 16px; }
 #shop-root .azs-more { display: block; margin: 16px auto; }
- 
-/* ---------- modals ---------- */
-.azs-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; display: flex; align-items: flex-end; justify-content: center; background: rgba(2, 6, 20, .75); }
-.azs-sheet { width: 100%; max-width: 560px; max-height: 92%; overflow-y: auto; padding: 16px; background: var(--azs-bg); border: 1px solid var(--azs-line); border-radius: 18px 18px 0 0; }
+.azs-overlay { position: fixed; inset: 0; z-index: 10020; display: flex; align-items: flex-end; justify-content: center; background: rgba(2, 6, 20, .86); }
+.azs-sheet { width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 16px; background: #070d24; border: 1px solid var(--azs-line); border-radius: 18px 18px 0 0; }
 @media (min-width: 700px) { .azs-overlay { align-items: center; } .azs-sheet { border-radius: 18px; } }
 .azs-sheet h3 { margin: 0 0 12px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
 .azs-x { background: none; border: 0; color: var(--azs-muted); font-size: 22px; cursor: pointer; }
@@ -90,36 +84,56 @@ textarea.azs-input { min-height: 90px; resize: vertical; }
 .azs-big { height: 150px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 64px; background: var(--azs-accent); margin-bottom: 10px; }
 .azs-desc { white-space: pre-wrap; word-break: break-word; margin: 10px 0; }
 .azs-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--azs-line); font-size: 14px; }
-.azs-item small { color: var(--azs-muted); display: block; }
-.azs-status { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--azs-card-2); }
+.azs-item-info { min-width: 0; flex: 1; }
+.azs-item-title { font-weight: 600; color: var(--azs-text); display: block; }
+.azs-item small { color: var(--azs-muted); display: block; margin-top: 2px; }
+.azs-status { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--azs-card-2); color: var(--azs-text); white-space: nowrap; }
 .azs-map { width: 100%; border-radius: 12px; overflow: hidden; background: var(--azs-card); }
-.azs-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 10001; max-width: 90%; padding: 10px 16px; border-radius: 12px; font-size: 14px; color: var(--azs-text); background: var(--azs-card-2); border: 1px solid var(--azs-line); }
- 
-/* ---------- chat: two panes on desktop, one pane at a time on phones ---------- */
-.azs-chat { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 9999; display: grid; grid-template-columns: 320px 1fr; background: var(--azs-bg); }
-.azs-clist { border-right: 1px solid var(--azs-line); overflow-y: auto; }
-.azs-chead { display: flex; align-items: center; gap: 8px; padding: 12px; border-bottom: 1px solid var(--azs-line); font-weight: 600; }
+.azs-warn-box {
+  width: 100%; max-width: 420px; padding: 18px; border-radius: 16px;
+  background: #0d1635; border: 1px solid rgba(245, 183, 0, .45);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .65);
+}
+.azs-warn-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.azs-warn-title { font-size: 16px; font-weight: 700; color: var(--azs-warn); }
+.azs-warn-body { font-size: 14px; line-height: 1.45; color: var(--azs-text); margin: 0 0 14px; }
+.azs-warn-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.azs-toast {
+  position: fixed; left: 50%; top: 18px; transform: translateX(-50%);
+  z-index: 10050; max-width: 92%; width: max-content; padding: 11px 16px;
+  border-radius: 12px; font-size: 14px; font-weight: 500;
+  color: var(--azs-text); background: #0d1635; border: 1px solid rgba(31, 199, 245, .45);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .55);
+}
+.azs-chat {
+  position: fixed; inset: 0; z-index: 10010;
+  display: grid; grid-template-columns: 320px 1fr;
+  background: #070d24; color: var(--azs-text);
+}
+.azs-clist { border-right: 1px solid var(--azs-line); overflow-y: auto; background: #070d24; }
+.azs-chead { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--azs-line); font-weight: 600; background: #0d1635; }
 .azs-chead span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.azs-conv { padding: 12px; border-bottom: 1px solid var(--azs-line); cursor: pointer; }
-.azs-conv.on { background: var(--azs-card-2); }
-.azs-conv b { display: block; font-size: 14px; }
-.azs-conv small { display: block; color: var(--azs-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.azs-thread { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.azs-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
-.azs-msg { max-width: 78%; padding: 8px 12px; border-radius: 14px 14px 14px 4px; font-size: 14px; word-break: break-word; background: var(--azs-card-2); align-self: flex-start; }
+.azs-conv { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--azs-line); cursor: pointer; background: #070d24; }
+.azs-conv-main { min-width: 0; flex: 1; }
+.azs-conv.on { background: #131f46; }
+.azs-conv b { display: block; font-size: 14px; color: var(--azs-text); }
+.azs-conv small { display: block; color: var(--azs-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.azs-thread { display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%; background: #070d24; }
+.azs-msgs { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.azs-msg { max-width: 80%; padding: 9px 12px; border-radius: 14px 14px 14px 4px; font-size: 14px; word-break: break-word; background: #131f46; color: var(--azs-text); align-self: flex-start; }
 .azs-msg.me { align-self: flex-end; border-radius: 14px 14px 4px 14px; background: var(--azs-accent); color: var(--azs-on-accent); }
 .azs-msg.me .azs-link { color: var(--azs-on-accent); }
-.azs-msg time { display: block; margin-top: 2px; font-size: 10px; opacity: .65; text-align: right; }
-.azs-live { padding: 8px 12px; border-bottom: 1px solid var(--azs-line); background: var(--azs-card); }
-.azs-live p { margin: 0 0 6px; font-size: 12px; color: var(--azs-muted); display: flex; justify-content: space-between; }
-.azs-compose { display: flex; gap: 6px; padding: 10px; border-top: 1px solid var(--azs-line); }
+.azs-msg time { display: block; margin-top: 3px; font-size: 10px; opacity: .7; text-align: right; }
+.azs-live { padding: 8px 12px; border-bottom: 1px solid var(--azs-line); background: #0d1635; }
+.azs-live p { margin: 0 0 6px; font-size: 12px; color: var(--azs-muted); display: flex; justify-content: space-between; align-items: center; }
+.azs-compose { display: flex; gap: 6px; padding: 10px 12px; border-top: 1px solid var(--azs-line); background: #0d1635; }
 .azs-compose .azs-input { margin: 0; flex: 1; min-width: 0; }
-.azs-empty-thread { margin: auto; color: var(--azs-muted); }
+.azs-empty-thread { margin: auto; color: var(--azs-muted); text-align: center; padding: 20px; }
 .azs-back { display: none; }
 @media (max-width: 760px) {
-  .azs-chat { grid-template-columns: 1fr; }
+  .azs-chat { grid-template-columns: 1fr; height: 100dvh; }
   .azs-chat .azs-thread { display: none; }
   .azs-chat.in-thread .azs-clist { display: none; }
   .azs-chat.in-thread .azs-thread { display: flex; }
-  .azs-back { display: inline-block; }
+  .azs-back { display: inline-flex; }
 }
