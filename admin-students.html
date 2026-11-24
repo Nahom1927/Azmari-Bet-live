@@ -1,0 +1,66 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover"><meta name="robots" content="noindex"><title>Azmari admin</title>
+<style>body{font:15px system-ui;margin:0;padding:14px;background:#060B1A;color:#eef;max-width:900px;margin:auto}.card{background:#111a33;border-radius:12px;padding:12px;margin:0 0 12px}input,select,button{display:block;width:100%;box-sizing:border-box;margin:6px 0;padding:10px;border-radius:8px;border:1px solid #345;background:#0b1226;color:#eef;font:inherit}button{background:#5ee38a;color:#041;border:0;font-weight:700}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:5px;border-bottom:1px solid #234;text-align:left}.big{font-size:32px;letter-spacing:6px;font-weight:700}</style>
+<style id="azmari-responsive-mobile">
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  touch-action: pan-y;
+}
+
+body {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+img, video, canvas, iframe {
+  max-width: 100%;
+}
+
+input, select, textarea {
+  font-size: 16px;
+}
+</style>
+
+</head><body><div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+var sb=supabase.createClient("https://rnqizccrzbolsynfsxbu.supabase.co","sb_publishable_1pbzO1FOGTjIjjE-yF7d1A__OFPESB2");
+var app=document.getElementById("app");
+function el(t,x,p){var e=document.createElement(t);if(x!=null)e.textContent=x;if(p)for(var k in p)e[k]=p[k];return e}
+function card(){var d=el("div");d.className="card";return d}
+function inp(ph,type,val){return el("input",null,{placeholder:ph,type:type||"text",value:val||""})}
+function sel(o){var s=el("select");o.forEach(function(x){s.appendChild(el("option",x[1],{value:x[0]}))});return s}
+var SUBJ=[["ear","Ear training"],["theory","Music theory"],["scales","Scales"],["ensemble","Ensemble"],["history","Music history"]];
+var SECT=[["attendance","Attendance"],["videos","Uploaded videos"],["live","Live section"]].concat(SUBJ);
+function login(){app.textContent="";var e=inp("Email"),p=inp("Password","password"),m=el("p");
+ app.append(el("h2","Admin login"),e,p,el("button","Log in",{onclick:async function(){var r=await sb.auth.signInWithPassword({email:e.value,password:p.value});if(r.error)m.textContent=r.error.message;else panel()}}),m)}
+async function panel(){
+ app.textContent="";var out=el("p"),box=card();
+ var c1=card(),n=inp("Full name"),ph=inp("Phone"),ins=inp("Instrument"),ses=sel([["Evening","Evening"],["Morning","Morning"],["Weekend","Weekend"]]);
+ c1.append(el("h3","Register student (creates ID)"),n,ph,ins,ses,el("button","Create ID",{onclick:async function(){var r=await sb.rpc("admin_enroll",{p_name:n.value,p_phone:ph.value,p_instrument:ins.value,p_session:ses.value});out.textContent=r.error?r.error.message:"Student ID: "+r.data;if(!r.error)load()}}));
+ var c2=card(),s2=inp("Student ID (AZ-26-0001)"),k2=sel(SECT),mi=inp("Valid minutes","number","30"),res=el("div",null,{className:"big"});
+ c2.append(el("h3","Issue one-time 4-digit code"),s2,k2,mi,el("button","Generate code",{onclick:async function(){var r=await sb.rpc("admin_issue_code",{p_student_no:s2.value,p_section:k2.value,p_valid_minutes:+mi.value||30});res.textContent="";out.textContent=r.error?r.error.message:"Give this code to the student. It works once.";if(!r.error)res.textContent=r.data}}),res);
+ var c3=card(),s3=inp("Student ID"),k3=sel(SUBJ),sc=inp("Score 0-100","number"),nt=inp("Note (optional)");
+ c3.append(el("h3","Record grade"),s3,k3,sc,nt,el("button","Save grade",{onclick:async function(){var r=await sb.rpc("admin_set_grade",{p_student_no:s3.value,p_subject:k3.value,p_score:+sc.value,p_note:nt.value||null});out.textContent=r.error?r.error.message:"Grade saved";if(!r.error)load()}}));
+ var c4=card(),s4=inp("Student ID"),k4=sel([["","General class"]].concat(SUBJ)),dt=inp("Date","date",new Date().toISOString().slice(0,10)),st=sel([["present","Present"],["late","Late"],["absent","Absent"]]);
+ c4.append(el("h3","Mark attendance"),s4,k4,dt,st,el("button","Save attendance",{onclick:async function(){var r=await sb.rpc("admin_mark_attendance",{p_student_no:s4.value,p_subject:k4.value,p_date:dt.value,p_status:st.value});out.textContent=r.error?r.error.message:"Attendance saved";if(!r.error)load()}}));
+ async function load(){var r=await sb.rpc("admin_overview");box.textContent="";box.appendChild(el("h3","All students"));
+  if(r.error){box.appendChild(el("p",r.error.message));return}
+  var t=el("table"),h=el("tr");["ID","Name","Phone","Grades","Avg","Attendance"].forEach(function(x){h.appendChild(el("th",x))});t.appendChild(h);
+  r.data.forEach(function(s){var tr=el("tr");[s.student_no,s.name,s.phone,s.graded+"/5",s.graded?s.avg_score:"Not graded",s.attended+"/"+s.classes].forEach(function(x){tr.appendChild(el("td",x))});t.appendChild(tr)});
+  box.appendChild(t)}
+ app.append(el("h2","Azmari admin"),el("button","Log out",{onclick:async function(){await sb.auth.signOut();login()}}),out,c1,c2,c3,c4,box);load()}
+sb.auth.getSession().then(function(s){if(s.data.session)panel();else login()});
+</script></body></html>

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin</title>
+<style>
+body{font:15px system-ui,sans-serif;margin:0;padding:16px;background:#0b1020;color:#fff}
+</style>
+
+<style id="azmari-responsive-mobile">
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  touch-action: pan-y;
+}
+
+body {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+img, video, canvas, iframe {
+  max-width: 100%;
+}
+
+input, select, textarea {
+  font-size: 16px;
+}
+</style>
+
+</head><body>
+<h2>Azmari Bet Admin</h2>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+var sb = supabase.createClient("https://rnqizccrzbolsynfsxbu.supabase.co", "sb_publishable_1pbzO1FOGTjIjjE-yF7d1A__OFPESB2");
+var app = document.getElementById("app");
+var tab = "pending";
+
+function el(tag, text, css) {
+  var e = document.createElement(tag);
+  if (text) e.textContent = text;
+  if (css) e.style.cssText = css;
+  return e;
+}
+function btn(text, fn, bg) {
+  var b = el("button", text, "padding:10px 14px;margin:4px 6px 0 0;border:0;border-radius:8px;font-size:15px;color:#000;background:" + (bg || "#29c5ff"));
+  b.onclick = fn;
+  return b;
+}
+function field(type, ph) {
+  var i = el("input", "", "display:block;width:100%;box-sizing:border-box;padding:10px;margin:6px 0;font-size:16px;border-radius:8px;border:1px solid #556;background:#fff;color:#000");
+  i.type = type; i.placeholder = ph;
+  return i;
+}
+
+function login(msg) {
+  app.textContent = "";
+  var em = field("email", "Admin email");
+  var pw = field("password", "Password");
+  var note = el("p", msg || "", "color:#ffb3b3");
+  app.appendChild(em);
+  app.appendChild(pw);
+  app.appendChild(btn("Log in", async function () {
+    var r = await sb.auth.signInWithPassword({ email: em.value.trim(), password: pw.value });
+    if (r.error) note.textContent = r.error.message; else load();
+  }));
+  app.appendChild(note);
+}
+
+async function decide(o, approve) {
+  var q = approve
+    ? "Approve? Confirm you saw at least " + o.price + " ETB with transaction ID " + o.reference + " in YOUR OWN Telebirr/CBE records."
+    : "Reject order " + o.reference + "?";
+  if (!confirm(q)) return;
+  var r = await sb.rpc("admin_decide_order", { p_id: o.id, p_approve: approve });
+  if (r.error) alert(r.error.message); else load();
+}
+
+async function load() {
+  var s = (await sb.auth.getSession()).data.session;
+  if (!s) { login(); return; }
+  var r = tab === "expiring" ? await sb.rpc("admin_expiring", { p_days: 7 }) : await sb.rpc("admin_list_orders", { p_status: tab });
+  app.textContent = "";
+  var top = el("div", "", "margin-bottom:12px");
+  ["pending", "approved", "rejected", "expiring"].forEach(function (t) {
+    top.appendChild(btn(t, function () { tab = t; load(); }, t === tab ? "#29c5ff" : "#8899aa"));
+  });
+  top.appendChild(btn("Refresh", load, "#cfd8e3"));
+  top.appendChild(btn("Log out", async function () { await sb.auth.signOut(); login(); }, "#cfd8e3"));
+  app.appendChild(top);
+  if (r.error) { app.appendChild(el("p", "Not allowed or error: " + r.error.message, "color:#ffb3b3")); return; }
+  if (!r.data.length) { app.appendChild(el("p", "No " + tab + " orders.")); return; }
+  r.data.forEach(function (o) {
+    var card = el("div", "", "border:1px solid #445;border-radius:10px;padding:12px;margin:10px 0;background:#141b33");
+    card.appendChild(el("div", o.product_name + (o.price != null ? " · " + o.price + " ETB" : ""), "font-weight:bold;font-size:17px"));
+    card.appendChild(el("div", (o.customer_name || "(no name)") + " · " + (o.customer_phone || "no phone"), "font-weight:bold"));if (o.email) card.appendChild(el("div", o.email));
+    if (o.reference) card.appendChild(el("div", "Transaction ID: " + o.reference, "font-family:monospace;margin:4px 0"));
+    if (o.item_ref) card.appendChild(el("div", "Item: " + o.item_ref));
+    if (o.expires_at) card.appendChild(el("div", "Expires: " + new Date(o.expires_at).toLocaleDateString("en-GB", {timeZone:"Africa/Addis_Ababa"}) + " (" + o.days_left + " days left)", "color:#ffd27a;font-weight:bold")); if (o.created_at) card.appendChild(el("div", "Submitted: " + new Date(o.created_at).toLocaleString("en-GB", {timeZone:"Africa/Addis_Ababa",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}) + (o.paid_time ? " · Receipt time: " + o.paid_time : "") + (o.pay_method ? " · " + o.pay_method : ""), "opacity:.85;font-size:13px"));
+    if (tab === "pending") {
+      card.appendChild(btn("Approve", function () { decide(o, true); }, "#5ee38a"));
+      card.appendChild(btn("Reject", function () { decide(o, false); }, "#ff8a8a"));
+    }
+    app.appendChild(card);
+  });
+}
+load();
+</script>
+</body></html>

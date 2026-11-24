@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex"><meta name="theme-color" content="#060B1A">
+<title>Azmari portal</title>
+<style>
+:root{--bg:#060B1A;--sf:#111a33;--sf2:#0b1226;--ln:#22305a;--ink:#eef2ff;--mu:#9aa8cc;--gr:#5ee38a;--gd:#f2c14e;--rd:#ff8a8a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#14204a 0,var(--bg) 60%) fixed;color:var(--ink);font:15px/1.5 "Public Sans","Noto Sans Ethiopic",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 40px}
+#app{max-width:960px;margin:0 auto;padding:14px}
+h1,h2,h3{margin:0 0 8px}h1{font-size:22px}h2{font-size:19px}h3{font-size:16px}
+h1 small{display:block;font-size:13px;color:var(--gd);font-weight:400}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px}.top .sp{flex:1}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--gd);color:#241a00;font-weight:700;font-size:12px;text-transform:capitalize}
+.card{background:color-mix(in srgb,var(--sf) 88%,transparent);border:1px solid var(--ln);border-radius:16px;padding:14px;margin:0 0 12px}
+.auth{max-width:420px;margin:8vh auto 0}
+label{display:block;margin-top:8px;color:var(--mu);font-size:13px}
+input,select,textarea{display:block;width:100%;margin:4px 0;padding:11px;border-radius:10px;border:1px solid var(--ln);background:var(--sf2);color:var(--ink);font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gr);outline-offset:1px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;font-weight:700;background:var(--gr);color:#04210f;margin:4px 0}
+button.ln{background:transparent;color:var(--ink);border:1px solid var(--ln)}
+button.gd{background:var(--gd);color:#241a00}
+button.sm{padding:6px 10px;font-size:13px;margin:2px}
+button.full{width:100%}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px}
+.tabs button{background:var(--sf);color:var(--mu);border:1px solid var(--ln);white-space:nowrap}
+.tabs button.on{background:var(--gr);color:#04210f;border-color:var(--gr)}
+.msg{min-height:20px;color:var(--gd)}.msg.err{color:var(--rd)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:7px 5px;border-bottom:1px solid var(--ln);text-align:left}th{color:var(--mu)}
+tr.click{cursor:pointer}tr.click:hover{background:#16224a}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sec{border:1px solid var(--ln);border-radius:14px;padding:12px;background:var(--sf2);text-align:left}
+.sec.open{border-color:var(--gr)}.sec .st{font-size:12px;color:var(--mu)}.sec.open .st{color:var(--gr)}
+.big{font-size:40px;letter-spacing:10px;font-weight:800;color:var(--gd);text-align:center;margin:8px 0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mu{color:var(--mu)}a{color:var(--gr)}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;border:1px solid var(--ln)}
+.pill.p{color:var(--gr);border-color:var(--gr)}.pill.l{color:var(--gd);border-color:var(--gd)}.pill.a{color:var(--rd);border-color:var(--rd)}
+.scroll{overflow-x:auto}
+.ac-progress{height:10px;background:#30171e;border:1px solid #66303a;border-radius:99px;overflow:hidden;margin:7px 0 4px}.ac-progress i{display:block;height:100%;background:#ef3340;border-radius:99px}.ac-week{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--ln)}.ac-week input{width:20px;min-width:20px;margin:3px 0;accent-color:#ef3340}.ac-done{color:#ff6874}.ac-level{margin:12px 0 5px;color:#ff8a8a;font-weight:800}.ac-locked{opacity:.8}
+@media(max-width:520px){.row2{grid-template-columns:1fr}}
+</style>
+<style id="azmari-responsive-mobile">
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  touch-action: pan-y;
+}
+
+body {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+img, video, canvas, iframe {
+  max-width: 100%;
+}
+
+input, select, textarea {
+  font-size: 16px;
+}
+</style>
+
+<style id="azmari-theme-sync">
+:root{--on:#04210f}
+button,.tabs button.on{color:var(--on)}
+:root[data-theme="light"]{--bg:#eef4ff;--sf:#ffffff;--sf2:#f3f6ff;--ln:#d3dcf2;--ink:#0d1b3a;--mu:#566488;--gr:#168a4a;--gd:#b07a05;--rd:#b23a30;--on:#ffffff;color-scheme:light}
+:root[data-theme="light"] body{background:radial-gradient(1200px 600px at 50% -10%,#dbe8ff 0,var(--bg) 60%) fixed}
+:root[data-theme="light"] tr.click:hover{background:#e6eeff}
+:root[data-theme="light"] .badge,:root[data-theme="light"] button.gd{color:#fff}
+:root[data-theme="light"] .ac-progress{background:#fde8ea;border-color:#f3b6bc}
+:root[data-theme="light"] .ac-done{color:#c4202e}:root[data-theme="light"] .ac-level{color:#b23a30}
+</style>
+<script>
+(function(){function pick(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}if(t==="light"||t==="dark")return t;try{return matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(e){return"dark"}}
+function apply(){var t=pick();document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",t==="light"?"#eef4ff":"#060B1A")}
+apply();window.addEventListener("storage",apply);window.addEventListener("focus",apply);window.addEventListener("pageshow",apply);document.addEventListener("visibilitychange",apply);
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",apply)}catch(e){}})();
+</script>
+</head>
+<body><div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  var sb = supabase.createClient("https://rnqizccrzbolsynfsxbu.supabase.co", "sb_publishable_1pbzO1FOGTjIjjE-yF7d1A__OFPESB2");
+  var app = document.getElementById("app");
+  var SUBJ = [["ear","Ear training"],["theory","Music theory"],["scales","Scales"],["ensemble","Ensemble"],["history","Music history"]];
+  var LESSON_SECT = [["videos","Uploaded videos"],["live","Live section"]].concat(SUBJ);
+  var SECT = [["attendance","Attendance"]].concat(LESSON_SECT);
+  var ME = null;
+  var ACADEMY_WEEKS = [{"week":1,"month":1,"level":"foundation","title":"What is music? Pitch, beat and staff","summary":"Do–Re–Mi echo singing; steady beat; quarter/half notes; treble staff and note names; hearing melody vs chords.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":2,"month":1,"level":"foundation","title":"Keyboard and five-finger position","summary":"Do–Re–Mi–Fa–Sol; 4/4; black-key groups; C five-finger position; C major triad and arpeggio.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":3,"month":1,"level":"foundation","title":"Octave and C major scale","summary":"Full movable-do major scale; note values and ties; C major fingering; intervals and I–V harmony.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":4,"month":1,"level":"foundation","title":"3/4, accidentals and first performance","summary":"3/4 pulse; sharps, flats and naturals; short C-major melody; perform an 8-bar melody and sing solfège.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":5,"month":2,"level":"foundation","title":"G major, F major and key signatures","summary":"Transpose movable-do; G and F major; one sharp/one flat; I–IV–V accompaniment; introductory syncopation.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":6,"month":2,"level":"foundation","title":"D major and intervals","summary":"D major scale; major/minor/perfect intervals; sixteenth-note patterns; sing and identify intervals.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":7,"month":2,"level":"foundation","title":"Qenet and Tizita major","summary":"Pentatonic qenet concept; Tizita major in C/G/D; Do Re Mi Sol La; qenet listening and drone accompaniment.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":8,"month":2,"level":"foundation","title":"Bati and Ambassel major","summary":"Bati and Ambassel note sets; compare qenet by ear; syncopation review; Month 2 practical/theory test.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":9,"month":3,"level":"foundation","title":"Natural minor scale","summary":"La-based minor solfège; A and E natural minor; 6/8 introduction; minor triads and relative major/minor.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":10,"month":3,"level":"foundation","title":"Triads and inversions","summary":"Major, minor, diminished and augmented triads; first/second inversions; smooth voice leading; 6/8 practice.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":11,"month":3,"level":"foundation","title":"Minor qenet family","summary":"Tizita minor, Bati minor and Ambassel minor; chromatic solfège; slow 12/8; qenet-based chord colours.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":12,"month":3,"level":"foundation","title":"Songs, consolidation and Level 1 exam","summary":"Sight-singing, rhythm reading in 4/4, 3/4 and 6/8; perform C-major and qenet pieces; Level 1 examination.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":13,"month":4,"level":"intermediate","title":"Seventh chords","summary":"Maj7, dominant 7, minor 7 and half-diminished; arpeggios; chord-tone melodies; syncopation level 2.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":14,"month":4,"level":"intermediate","title":"Sus, add chords and chord symbols","summary":"Sus2, sus4, add9 and 6 chords; chord symbols and inversions; suspension/resolution; accompaniment patterns.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":15,"month":4,"level":"intermediate","title":"Anchihoye qenet","summary":"Anchihoye note set and solfège; contrast with Ambassel; 12/8 and 4/4 swing; diminished/augmented colour chords.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":16,"month":4,"level":"intermediate","title":"All four qenet and Month 4 exam","summary":"Play and sing Tizita, Bati, Ambassel and Anchihoye; qenet chord choices; kebero + clap in 12/8.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":17,"month":5,"level":"intermediate","title":"Circle of fifths and key signatures","summary":"Transpose melodies; A, E, Bb, Eb and Ab major; relative minors; key signatures up to four sharps/flats.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":18,"month":5,"level":"intermediate","title":"Essential chord progressions","summary":"I–IV–V–I, I–vi–IV–V, ii–V–I and minor progressions; 16-bar chord charts; bass and chord accompaniment.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":19,"month":5,"level":"intermediate","title":"Compound rhythms: 6/8 and 12/8","summary":"Compound pulse and subdivisions; ta-ki-da; 3-against-2; dotted rhythms; 12/8 accompaniment patterns.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":20,"month":5,"level":"intermediate","title":"Regional styles and Ethiopian dance rhythms","summary":"Listening and playing: Eskista, Chiqchiqa, Gurage, Oromo, Tigrigna, Azmari and modern Ethiopian jazz/pop; Month 5 test.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":21,"month":6,"level":"intermediate","title":"Form and song structure","summary":"Motifs, 8-bar periods, verse–chorus, AABA, strophic and call-and-response; cadences and rubato.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":22,"month":6,"level":"intermediate","title":"Improvisation on a qenet","summary":"Improvise on Tizita, Bati, Ambassel or Anchihoye over drone/loop; apply the 4 S: Space, Shape, Sound, Story.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":23,"month":6,"level":"intermediate","title":"Arranging for keyboard and small band","summary":"Counter-melody, intro/outro, bass lines, chord voicings and percussion; arrange 16 bars for voice, keys, bass and percussion.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":24,"month":6,"level":"intermediate","title":"Recording and Level 2 examination","summary":"Click-track performance; basic recording and file management; qenet, harmony, rhythm, solfège and arrangement exam.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":25,"month":7,"level":"advanced","title":"Extended harmony","summary":"Scales in 12 keys; 9th/11th/13th chords; shell/rootless voicings; ensemble tuning and unison qenet.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":26,"month":7,"level":"advanced","title":"Modes and modal harmony","summary":"Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian and Locrian; modal vamps; 12/8 grooves; harmony vocals.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":27,"month":7,"level":"advanced","title":"Chromatic melody and secondary dominants","summary":"Chromatic passing notes, enclosures and secondary dominants; syncopated bass/drum patterns; full-band groove.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":28,"month":7,"level":"advanced","title":"Modulation and motif development","summary":"Pivot-chord, direct and circle-of-fifths modulation; tempo changes and rubato; add a key-change section.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":29,"month":8,"level":"advanced","title":"Borrowed chords and reharmonisation","summary":"Modal interchange, iv, bVI and bVII; tritone substitution introduction; parallel/contrary motion.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":30,"month":8,"level":"advanced","title":"Harmonising Ethiopian qenet","summary":"Drone, diatonic-chord and colour-chord methods; harmonise Tizita, Bati, Ambassel and Anchihoye.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":31,"month":8,"level":"advanced","title":"Traditional ornaments and odd meters","summary":"Trills, slides and turns; pedal point/drone; 5/8, 7/8 and 9/8; ensemble odd-meter groove practice.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":32,"month":8,"level":"advanced","title":"Transcription project","summary":"Transcribe a short recording by ear; analyse chords; qenet dictation; present transcription to class.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":33,"month":9,"level":"advanced","title":"Azmari poetry and sem-ena-werq","summary":"Write a short verse with surface/hidden meaning; free-time phrasing; qenet refrain; voice + krar + kebero.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":34,"month":9,"level":"advanced","title":"Advanced improvisation","summary":"Develop motifs, call-and-response, quoting and variation; improvise over ii–V–I and qenet loops.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":35,"month":9,"level":"advanced","title":"Songwriting: lyrics, melody and chords","summary":"Write verse/chorus/bridge; choose harmony for emotional tension/release; present a song idea to ensemble.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":36,"month":9,"level":"advanced","title":"Mid-Level-3 consolidation and concert","summary":"Review advanced harmony, rhythm and solfège; perform and submit 32-bar original song/arrangement.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":37,"month":10,"level":"advanced","title":"Arranging for a band","summary":"Score layout, transposing instruments, ranges, doubling and texture; rehearse traditional melody arrangement.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":38,"month":10,"level":"advanced","title":"Voicing and orchestration","summary":"Keyboard, guitar, krar, brass/wind voicings; sectionals and wind/string parts.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":39,"month":10,"level":"advanced","title":"Conducting and bandleading","summary":"Conduct 4/4, 3/4 and 6/8; cues and tempo setting; student-led ensemble turns.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":40,"month":10,"level":"advanced","title":"Sound system and live audio","summary":"Microphone technique, DI, mixer, monitor mix and signal flow; ensemble sound check.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":41,"month":11,"level":"advanced","title":"Traditional–modern fusion","summary":"Combine qenet melody, modern groove and jazz harmony; rehearse fusion repertoire.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":42,"month":11,"level":"advanced","title":"Music production","summary":"DAW basics, MIDI, audio editing, tempo maps, basic EQ/reverb and stereo ensemble recording.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":43,"month":11,"level":"advanced","title":"Music business and rights","summary":"Copyright, royalties, song registration, contracts and performance rights; practical music-business awareness.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":44,"month":11,"level":"advanced","title":"Stage craft and audience","summary":"Stage presence, introductions, storytelling, eye contact and microphone technique; dress rehearsal.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":45,"month":12,"level":"advanced","title":"Final polish and coaching","summary":"Individual coaching on solo repertoire; final ensemble rehearsal and performance preparation.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":46,"month":12,"level":"advanced","title":"Programme, publicity and recording masters","summary":"Programme notes, poster/publicity, final recording masters and technical rehearsal.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":47,"month":12,"level":"advanced","title":"Final theory exam and concert preparation","summary":"Final theory exam, solo preparation, warm-up and full concert soundcheck.","pillars":["Melody","Harmony","Rhythm","Solfège"]},{"week":48,"month":12,"level":"advanced","title":"Portfolio, graduation and diploma","summary":"Review practice log, videos and reflections; final concert, graduation and next-step plan.","pillars":["Melody","Harmony","Rhythm","Solfège"]}];
+  var ACADEMY_LEVELS = [{id:"foundation",name:"Level 1 — Foundation",from:1,to:12,certificate:"Foundation of Music Certificate"},{id:"intermediate",name:"Level 2 — Intermediate",from:13,to:24,certificate:"Intermediate Musicianship Certificate"},{id:"advanced",name:"Level 3 — Advanced & Ensemble",from:25,to:48,certificate:"AZMARI MUSIC ACADEMY Diploma"}];
+
+  function el(tag, text, props) {
+    var e = document.createElement(tag);
+    if (text != null) e.textContent = text;
+    if (props) for (var k in props) e[k] = props[k];
+    return e;
+  }
+  function add(p) { for (var i = 1; i < arguments.length; i++) if (arguments[i]) p.appendChild(arguments[i]); return p; }
+  function card() { var d = el("div"); d.className = "card"; return d; }
+  function inp(ph, type, val) { var i = el("input", null, { placeholder: ph || "", type: type || "text", value: val || "" }); i.autocomplete = "off"; return i; }
+  function lab(t, input) { var w = el("div"); add(w, el("label", t), input); return w; }
+  function sel(opts) { var s = el("select"); opts.forEach(function (o) { s.appendChild(el("option", o[1], { value: o[0] })); }); return s; }
+  function btn(t, fn, cls) { var b = el("button", t); b.type = "button"; if (cls) b.className = cls; b.onclick = fn; return b; }
+  function msg() { return el("p", "", { className: "msg" }); }
+  function say(m, text, err) { m.textContent = text || ""; m.className = "msg" + (err ? " err" : ""); }
+  function safeUrl(u) { return /^https:\/\//i.test(u || "") ? u : "#"; }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+
+  function brand() {
+    var h = el("h1", "Azmari Bet");
+    h.appendChild(el("small", "አዝማሪ ቤት · Portal"));
+    return h;
+  }
+
+  /* ---------- login / sign up ---------- */
+  function authView(note) {
+    clear(app);
+    var box = card(); box.className = "card auth";
+    var m = msg(); if (note) say(m, note);
+    var mode = "in";
+    var email = inp("you@example.com", "email"), pass = inp("Password (6+ characters)", "password");
+    var go = btn("Log in", run, "full");
+    var tabs = el("div"); tabs.className = "tabs";
+    var tIn = btn("Log in", function () { setMode("in"); }), tUp = btn("Create account", function () { setMode("up"); });
+    add(tabs, tIn, tUp);
+    function setMode(x) {
+      mode = x; tIn.className = x === "in" ? "on" : ""; tUp.className = x === "up" ? "on" : "";
+      go.textContent = x === "in" ? "Log in" : "Create account"; say(m, "");
+    }
+    async function run() {
+      say(m, "");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { say(m, "Enter a valid email.", true); return; }
+      if (pass.value.length < 6) { say(m, "Password needs 6+ characters.", true); return; }
+      go.disabled = true;
+      var r = mode === "in"
+        ? await sb.auth.signInWithPassword({ email: email.value.trim(), password: pass.value })
+        : await sb.auth.signUp({ email: email.value.trim(), password: pass.value });
+      go.disabled = false;
+      if (r.error) { say(m, r.error.message, true); return; }
+      if (!r.data.session) { say(m, "Account created. Check your email to confirm, then log in."); setMode("in"); return; }
+      boot();
+    }
+    var forgot = btn("Forgot password?", async function () {
+      if (!email.value.trim()) { say(m, "Type your email first.", true); return; }
+      var r = await sb.auth.resetPasswordForEmail(email.value.trim(), { redirectTo: location.href.split("#")[0] });
+      say(m, r.error ? r.error.message : "Reset link sent. Check your email.", !!r.error);
+    }, "ln sm");
+    pass.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
+    add(box, brand(), el("p", "Students, teachers and admins log in here.", { className: "mu" }), tabs, lab("Email", email), lab("Password", pass), go, forgot, m);
+    app.appendChild(box); setMode("in");
+  }
+
+  /* ---------- link Student ID ---------- */
+  function claimView() {
+    clear(app); shell("none");
+    var c = card(), m = msg(), id = inp("AZ-26-0001"), ph = inp("Phone you registered with", "tel");
+    add(c, el("h2", "Link your Student ID"),
+      el("p", "Enter the Student ID the school gave you and the phone number it was registered with. You do this once.", { className: "mu" }),
+      lab("Student ID", id), lab("Phone", ph),
+      btn("Link my account", async function () {
+        var r = await sb.rpc("claim_student", { p_student_no: id.value, p_phone: ph.value });
+        if (r.error) { say(m, r.error.message, true); return; }
+        if (!r.data) { say(m, "ID and phone do not match, or the ID is already linked.", true); return; }
+        boot();
+      }, "full"), m,
+      el("p", "Not registered yet? Ask the school to create your Student ID. Teachers: ask an admin to give your email the teacher role, then log in again.", { className: "mu" }));
+    app.appendChild(c);
+  }
+
+  /* ---------- shared shell ---------- */
+  function shell(role) {
+    var top = el("div"); top.className = "top";
+    add(top, brand(), el("div", null, { className: "sp" }), role && role !== "none" ? el("span", role, { className: "badge" }) : null,
+      btn("Log out", async function () { await sb.auth.signOut(); ME = null; authView(); }, "ln sm"));
+    app.appendChild(top);
+  }
+  function tabbed(items) {
+    var bar = el("div"); bar.className = "tabs";
+    var body = el("div"), buttons = [];
+    items.forEach(function (it, i) {
+      var b = btn(it[0], function () {
+        buttons.forEach(function (x) { x.className = ""; }); b.className = "on";
+        clear(body); it[1](body);
+      });
+      buttons.push(b); bar.appendChild(b);
+    });
+    add(app, bar, body);
+    buttons[0].click();
+  }
+
+  /* ---------- student ---------- */
+  function studentView() {
+    clear(app); shell("student");
+    tabbed([["My progress", progressTab], ["Academy", academyStudentTab], ["Exams", examsTab], ["Sections", sectionsTab]]);
+  }
+  async function progressTab(body) {
+    var r = await sb.rpc("my_progress");
+    if (r.error || !r.data) { add(body, el("p", r.error ? r.error.message : "No data.")); return; }
+    var d = r.data, c = card();
+    add(c, el("h2", d.name), el("p", "Student ID: " + d.student_no + " · " + (d.instrument || "") + " · " + (d.session || ""), { className: "mu" }));
+    var g = card(), t = el("table"); g.appendChild(el("h3", "Grades"));
+    d.grades.forEach(function (x) { var tr = el("tr"); add(tr, el("td", x.subject), el("td", x.score == null ? "Not graded" : String(x.score)), el("td", x.note || "", { className: "mu" })); t.appendChild(tr); });
+    g.appendChild(el("div", null, { className: "scroll" })).appendChild(t);
+    var a = d.attendance, ac = card();
+    add(ac, el("h3", "Attendance"), el("p", "Present " + a.present + " · Late " + a.late + " · Absent " + a.absent + " · Total " + a.total));
+    add(body, c, g, ac);
+  }
+  function printAcademyCertificate(student, course, major, date) {
+    var w = window.open("", "_blank"); if (!w) { alert("Allow pop-ups to print the certificate."); return; }
+    w.document.write("<!doctype html><html><head><meta charset=\"utf-8\"><title>AZMARI MUSIC ACADEMY Certificate</title><style>body{font-family:Georgia,serif;background:#f5f1e8;color:#18243b;padding:5vw;text-align:center}.paper{border:10px double #bd8d37;background:#fffdf7;padding:55px 28px;max-width:900px;margin:auto}h1{color:#9a7025;font-size:38px}.name{font-size:34px;font-weight:bold;border-bottom:1px solid #bd8d37;display:inline-block;padding:10px 30px}h2{font-size:28px;margin:28px}.seal{border:2px solid #bd8d37;border-radius:50%;width:90px;height:90px;margin:25px auto;display:grid;place-items:center;font-size:30px}@media print{button{display:none}}</style></head><body><div class=\"paper\"><div>AZMARI MUSIC ACADEMY · አዝማሪ ሙዚቃ አካዳሚ</div><h1>Certificate of Completion</h1><p>This certificate is proudly presented to</p><div class=\"name\">"+String(student).replace(/[<>]/g,"")+"</div><p>for successfully completing</p><h2>"+String(course).replace(/[<>]/g,"")+"</h2><p>Main instrument / major: "+String(major||"Music").replace(/[<>]/g,"")+"</p><p>Issued: "+date+"</p><div class=\"seal\">★</div><p>AZMARI MUSIC ACADEMY</p><button onclick=\"window.print()\">Print / Save as PDF</button></div></body></html>"); w.document.close();
+  }
+  function academyPct(weeks, from, to) {
+    var set = new Set((weeks || []).map(Number)); var total = to - from + 1, done = 0;
+    for (var i = from; i <= to; i++) if (set.has(i)) done++;
+    return { done: done, total: total, pct: Math.round(done / total * 100) };
+  }
+  function academyProgressCard(parent, weeks, major, readOnly) {
+    var c = card();
+    add(c, el("h3", "🎓 Smart Music Academy"), el("p", "Main course / instrument: " + (major || "Not recorded"), { className: "mu" }),
+      el("p", "Instructor-managed progress · students can view only", { className: "mu" }));
+    ACADEMY_LEVELS.forEach(function (lv) {
+      var p = academyPct(weeks, lv.from, lv.to), row = el("div");
+      row.className = "ac-level"; row.textContent = lv.name + " · " + p.pct + "%";
+      var bar = el("div"); bar.className = "ac-progress";
+      var fill = el("i"); fill.style.width = p.pct + "%"; bar.appendChild(fill);
+      add(c, row, bar, el("p", p.done + " of " + p.total + " weeks completed", { className: "mu" }));
+      var completed = ACADEMY_WEEKS.filter(function (w) { return w.week >= lv.from && w.week <= lv.to && (weeks || []).map(Number).indexOf(w.week) >= 0; });
+      if (completed.length) add(c, el("p", "Completed: " + completed.map(function (w) { return "W" + w.week; }).join(", "), { className: "ac-done" }));
+      if (p.done === p.total) add(c, el("p", "Instructor has marked this level's weekly curriculum complete. Final exam and assessment requirements still apply.", { className: "mu" }));
+    });
+    var details = el("details"), summary = el("summary", "View 48-week curriculum and instructor records");
+    details.appendChild(summary);
+    ACADEMY_WEEKS.forEach(function (w) {
+      var done = (weeks || []).map(Number).indexOf(w.week) >= 0;
+      var line = el("div"); line.className = "ac-week";
+      add(line, el("span", done ? "✓" : "○", { className: done ? "ac-done" : "mu" }),
+        el("div", "Week " + w.week + " · " + w.title + (done ? " — Completed by instructor" : " — Not yet marked complete"), { className: done ? "ac-done" : "" }));
+      details.appendChild(line);
+    });
+    c.appendChild(details); parent.appendChild(c);
+  }
+  /* ---------- written theory exams (from AZMARI MUSIC ACADEMY guide book) ---------- */
+  var EXAMS = [
+    { id: "l1", title: "Level 1 · Foundation theory exam", about: "Weeks 1–12: notes, scales, triads, rhythm and the first qenet.", qs: [
+      { q: "How many semitones are in one whole tone?", o: ["1", "2", "3", "4"], a: 1, e: "A whole tone is two semitones (Week 2)." },
+      { q: "Which pair of white keys is only a semitone apart?", o: ["C–D", "E–F", "F–G", "A–B"], a: 1, e: "E–F and B–C are the natural semitones (Week 2)." },
+      { q: "Which pattern builds every major scale? (T = whole tone, S = semitone)", o: ["T T S T T T S", "T S T T S T T", "S T T S T T T", "T T T S T T S"], a: 0, e: "Major scale: T T S T T T S (Week 3)." },
+      { q: "Which pattern builds the natural minor scale?", o: ["T T S T T T S", "T S T T S T T", "T T S T T S T", "S T T T S T T"], a: 1, e: "Natural minor: T S T T S T T (Week 9)." },
+      { q: "Which notes make the C major triad?", o: ["C–D–E", "C–E–G", "C–F–G", "C–E–A"], a: 1, e: "The C major triad is C–E–G (Week 2)." },
+      { q: "Which key is the relative minor of C major?", o: ["D minor", "E minor", "A minor", "G minor"], a: 2, e: "The relative minor starts on the 6th degree: C major → A minor (Week 9)." },
+      { q: "How many beats does a half note get in 4/4 time?", o: ["1", "2", "3", "4"], a: 1, e: "A half note (ta-a) lasts two beats (Week 1)." },
+      { q: "How many beats are in each bar of 3/4 time?", o: ["2", "3", "4", "6"], a: 1, e: "3/4 has three quarter-note beats: the waltz feel (Week 4)." },
+      { q: "6/8 time is felt as…", o: ["Six equal beats", "Two big beats, each divided in three", "Four beats of two", "Three beats of two"], a: 1, e: "6/8 has two big beats, each divided in three (Week 9)." },
+      { q: "Which key signature belongs to G major?", o: ["One flat", "One sharp (F♯)", "Two sharps", "No sharps or flats"], a: 1, e: "G major has one sharp, F♯ (Week 5)." },
+      { q: "Which key signature belongs to F major?", o: ["One sharp", "One flat (B♭)", "Two flats", "Two sharps"], a: 1, e: "F major has one flat, B♭ (Week 5)." },
+      { q: "How many sharps does D major have?", o: ["One", "Two (F♯ and C♯)", "Three", "None"], a: 1, e: "D major: D E F♯ G A B C♯ D (Week 6)." },
+      { q: "In movable-do, when you sing a melody in G major, Do is…", o: ["C", "D", "G", "F♯"], a: 2, e: "Do is always the key note; in G major Do is G (Week 5)." },
+      { q: "What is the interval from C up to G?", o: ["Perfect 4th", "Perfect 5th", "Major 3rd", "Major 6th"], a: 1, e: "C to G is a perfect 5th, seven semitones (Week 6)." },
+      { q: "What is the interval from C up to E?", o: ["Major 2nd", "Minor 3rd", "Major 3rd", "Perfect 4th"], a: 2, e: "C to E is a major 3rd, four semitones (Week 6)." },
+      { q: "Which notes make the A minor triad?", o: ["A–C–E", "A–C♯–E", "A–D–E", "A–B–E"], a: 0, e: "Minor triad = root + minor 3rd + perfect 5th: A–C–E (Week 9)." },
+      { q: "A diminished triad is built from…", o: ["Major 3rd + minor 3rd", "Minor 3rd + major 3rd", "Minor 3rd + minor 3rd", "Major 3rd + major 3rd"], a: 2, e: "Diminished = m3 + m3 (Week 10)." },
+      { q: "An augmented triad is built from…", o: ["Major 3rd + minor 3rd", "Minor 3rd + major 3rd", "Minor 3rd + minor 3rd", "Major 3rd + major 3rd"], a: 3, e: "Augmented = M3 + M3 (Week 10)." },
+      { q: "Which notes make Tizita major in C?", o: ["C D E G A", "C E F G B", "C D F G A", "C D♭ F G♭ A"], a: 0, e: "Tizita major in C: C D E G A (Week 7)." },
+      { q: "Tizita major is made from the major scale by removing which degrees?", o: ["2nd and 6th", "3rd and 7th", "4th and 7th", "1st and 5th"], a: 2, e: "Remove the 4th and 7th (F and B in C) (Week 7)." },
+      { q: "Which notes make Bati major in C?", o: ["C D E G A", "C E F G B", "C D F G A", "C D♭ F G♭ A"], a: 1, e: "Bati major in C: C E F G B (Week 8)." },
+      { q: "Which notes make Ambassel major in C?", o: ["C D E G A", "C E F G B", "C D F G A", "C D♭ F G A♭"], a: 2, e: "Ambassel major in C: C D F G A (Week 8)." },
+      { q: "Which notes make Tizita minor in C?", o: ["C D E♭ G A♭", "C E♭ F G B♭", "C D♭ F G A♭", "C D E G A"], a: 0, e: "Tizita minor in C: C D E♭ G A♭ (Week 11)." },
+      { q: "Which notes make Bati minor in C?", o: ["C D E♭ G A♭", "C E♭ F G B♭", "C D♭ F G A♭", "C E F G B"], a: 1, e: "Bati minor in C: C E♭ F G B♭ (Week 11)." },
+      { q: "Which notes make Ambassel minor in C?", o: ["C D E♭ G A♭", "C E♭ F G B♭", "C D♭ F G A♭", "C D F G A"], a: 2, e: "Ambassel minor in C: C D♭ F G A♭ (Week 11)." }
+    ] },
+    { id: "l2", title: "Level 2 · Intermediate theory exam", about: "Weeks 13–24: seventh chords, all four qenet, circle of fifths, progressions, compound rhythm, form.", qs: [
+      { q: "Which notes make Cmaj7?", o: ["C E G B", "C E G B♭", "C E♭ G B♭", "C E♭ G♭ B♭"], a: 0, e: "Cmaj7 = C E G B (Week 13)." },
+      { q: "Which notes make C7 (dominant seventh)?", o: ["C E G B", "C E G B♭", "C E♭ G B♭", "C E♭ G♭ B♭"], a: 1, e: "C7 = C E G B♭ (Week 13)." },
+      { q: "Which notes make Cm7?", o: ["C E G B", "C E G B♭", "C E♭ G B♭", "C E♭ G♭ B♭"], a: 2, e: "Cm7 = C E♭ G B♭ (Week 13)." },
+      { q: "Cm7♭5 is also called…", o: ["Dominant seventh", "Half-diminished", "Major seventh", "Suspended"], a: 1, e: "Cm7♭5 is the half-diminished chord (Week 13)." },
+      { q: "What is the diatonic seventh chord on the 5th degree of C major?", o: ["Gmaj7", "G7", "Gm7", "Gm7♭5"], a: 1, e: "The diatonic sevenths of C are Cmaj7, Dm7, Em7, Fmaj7, G7, Am7, Bm7♭5 (Week 13)." },
+      { q: "What is the diatonic seventh chord on the 7th degree of C major?", o: ["Bm7", "Bmaj7", "Bm7♭5", "B7"], a: 2, e: "Bm7♭5 sits on the 7th degree (Week 13)." },
+      { q: "Which notes make Csus4?", o: ["C D G", "C F G", "C E F", "C E G"], a: 1, e: "Sus4 replaces the 3rd with the 4th: C F G (Week 14)." },
+      { q: "Sus chords are central to the harmony of which qenet?", o: ["Tizita major", "Bati major", "Ambassel minor", "None of them"], a: 2, e: "Csus4 and Gsus4 appear in the Ambassel minor chord set (Week 14)." },
+      { q: "Which notes make Anchihoye in C?", o: ["C D E G A", "C E F G B", "C D F G A", "C D♭ F G♭ A"], a: 3, e: "Anchihoye in C: C D♭ F G♭ A (Week 15)." },
+      { q: "How is Anchihoye made from Ambassel major?", o: ["Lower the 2nd and 4th notes by a semitone", "Raise the 2nd and 4th notes by a semitone", "Remove the 3rd and 7th", "Remove the 2nd and 6th"], a: 0, e: "Ambassel major C D F G A → C D♭ F G♭ A (Week 15)." },
+      { q: "Which notes make Cdim?", o: ["C E♭ G♭", "C E G", "C E G♯", "C F G"], a: 0, e: "Cdim = C E♭ G♭ (Week 15)." },
+      { q: "Which qenet has the interval pattern T, T, 1½T, T, 1½T?", o: ["Tizita major", "Bati major", "Ambassel major", "Anchihoye"], a: 0, e: "Tizita major: T, T, 1½T, T, 1½T (Week 7)." },
+      { q: "Order of sharps: F, C, G, D, A, E, B. Which is the 4th sharp?", o: ["F♯", "G♯", "D♯", "A♯"], a: 2, e: "F–C–G–D: the 4th sharp is D♯ (Week 17)." },
+      { q: "Moving up a perfect fifth from C on the circle of fifths gives…", o: ["F", "G", "D", "A"], a: 1, e: "C → G → D → A … each step up is a fifth (Week 17)." },
+      { q: "What is the relative minor of G major?", o: ["A minor", "E minor", "B minor", "D minor"], a: 1, e: "The 6th degree of G major is E (Week 17)." },
+      { q: "Which progression is I–vi–IV–V in C major?", o: ["C – Am – F – G", "C – Dm – G – C", "C – F – G – C", "Am – F – C – G"], a: 0, e: "I = C, vi = Am, IV = F, V = G (Week 18)." },
+      { q: "Which progression is ii–V–I in C major?", o: ["Dm – G – C", "C – F – G", "Am – F – C", "Em – Am – Dm"], a: 0, e: "ii = Dm, V = G, I = C (Week 18)." },
+      { q: "Which cadence is V–I?", o: ["Plagal", "Authentic", "Half", "Deceptive"], a: 1, e: "Authentic cadence = V–I (Week 21)." },
+      { q: "Which cadence is V–vi?", o: ["Plagal", "Authentic", "Half", "Deceptive"], a: 3, e: "Deceptive cadence = V–vi (Week 21)." },
+      { q: "A half cadence ends on which chord?", o: ["I", "V", "IV", "vi"], a: 1, e: "A half cadence moves to V (Week 21)." },
+      { q: "How many main beats does a 12/8 bar have, each made of three eighths?", o: ["Two", "Three", "Four", "Six"], a: 2, e: "12/8 has four main beats of three eighths (Week 19)." },
+      { q: "“3 against 2” (a polyrhythm) means…", o: ["Three notes played against two in the same time", "Three bars of two beats", "Three drummers and two singers", "A change from 3/4 to 2/4"], a: 0, e: "A polyrhythm layers 3 against 2 (Week 19)." },
+      { q: "What are the “4 S” of improvisation?", o: ["Space, Shape, Sound, Story", "Speed, Scale, Solo, Style", "Sing, Sway, Stop, Start", "Sharp, Slow, Soft, Sweet"], a: 0, e: "Space (rest!), Shape (rise and fall), Sound (ornament and touch), Story (Week 22)." },
+      { q: "Drone harmony under a C-based qenet uses which two notes?", o: ["C and G", "C and F♯", "D and A", "E and B"], a: 0, e: "Drone harmony is tonic and fifth, C + G (Week 22)." },
+      { q: "When recording, the input level should be…", o: ["Pushed into the red for loudness", "Kept below clipping", "Set to zero", "Changed constantly"], a: 1, e: "Keep the input level below clipping (Week 24)." }
+    ] },
+    { id: "fin", title: "Final · Diploma theory exam", about: "Level 3 (Weeks 25–48): extended harmony, modes, modulation, azmari poetry, ensemble, production and assessment.", qs: [
+      { q: "Which chords are called extended chords?", o: ["9, 11 and 13", "Sus2 and sus4", "Triads only", "Diminished and augmented"], a: 0, e: "Extended chords: 9, 11, 13 (Week 25)." },
+      { q: "Which mode is the same as the natural minor scale?", o: ["Ionian", "Dorian", "Aeolian", "Lydian"], a: 2, e: "Aeolian = natural minor (Week 26)." },
+      { q: "Which mode is the same as the major scale?", o: ["Ionian", "Dorian", "Phrygian", "Locrian"], a: 0, e: "Ionian = major scale (Week 26)." },
+      { q: "Which mode's colour is compared with Ambassel in the guide book?", o: ["Lydian", "Phrygian", "Mixolydian", "Ionian"], a: 1, e: "Ambassel ≈ Phrygian colour (Week 26)." },
+      { q: "In C major, the secondary dominant V7/V is…", o: ["D7", "A7", "E7", "F7"], a: 0, e: "V7/V is the dominant of G, which is D7 (Week 27)." },
+      { q: "In C major, the secondary dominant V7/ii is…", o: ["A7", "D7", "E7", "G7"], a: 0, e: "V7/ii is the dominant of Dm, which is A7 (Week 27)." },
+      { q: "Which is NOT a modulation method in the guide book?", o: ["Pivot chord", "Direct modulation", "Circle-of-fifths modulation", "Random transposition"], a: 3, e: "Methods taught: pivot chord, direct, circle-of-fifths (Week 28)." },
+      { q: "Which borrowed chords come from modal interchange in a major key?", o: ["iv, ♭VI, ♭VII", "ii, iii, vi", "I, IV, V", "V7, vii°"], a: 0, e: "Borrowed chords: iv, ♭VI, ♭VII (Week 29)." },
+      { q: "In C major, the borrowed iv chord is…", o: ["F", "Fm", "Dm", "Am"], a: 1, e: "iv in C minor colour is Fm (Week 29)." },
+      { q: "Which method of harmonising a qenet holds the tonic and fifth under the melody?", o: ["Drone method", "Diatonic-chord method", "Colour-chord method", "Tritone method"], a: 0, e: "Drone method (traditional): C + G under the qenet (Week 30)." },
+      { q: "Which method uses extended or sus chords, such as Cmaj7 – Em7 – Fmaj7 – G6?", o: ["Drone method", "Diatonic-chord method", "Colour-chord method", "Pedal method"], a: 2, e: "Colour-chord method (modern) (Week 30)." },
+      { q: "How is 7/8 grouped in the guide book?", o: ["2+2+3", "3+3+3", "3+2", "4+4"], a: 0, e: "7/8 = 2+2+3 (Week 31)." },
+      { q: "How is 9/8 grouped?", o: ["3+3+3", "2+2+2", "3+2", "2+2+3"], a: 0, e: "9/8 = 3+3+3 (Week 31)." },
+      { q: "In sem-ena-werq (wax and gold), the “gold” is…", o: ["The hidden meaning", "The surface meaning", "The rhythm", "The tuning"], a: 0, e: "Wax = surface meaning; gold = hidden meaning (Week 33)." },
+      { q: "Sem-ena-werq is the art of…", o: ["Saying two things at once", "Singing without words", "Playing very loudly", "Tuning a krar"], a: 0, e: "A surface meaning and a hidden meaning together (Chapter 1)." },
+      { q: "Rubato means…", o: ["Free, flexible time", "Very fast", "Silent", "Strict click"], a: 0, e: "Free-time (rubato) singing (Week 33)." },
+      { q: "Which instruments belong to the rhythm section of the ensemble?", o: ["Kebero, atamo, drum kit, bass guitar", "Masenqo, washint, violin", "Keyboard, guitar, krar", "Lead and backing vocals"], a: 0, e: "Rhythm section: drum kit, kebero, atamo, tsinatsil, bass guitar (Part D)." },
+      { q: "Which instruments belong to the melody section?", o: ["Voices, masenqo, washint, violin, saxophone", "Drum kit and kebero", "Bass guitar only", "Mixer and monitors"], a: 0, e: "Melody section: voices, masenqo, washint, violin, saxophone… (Part D)." },
+      { q: "How long is the physical ensemble session in the plan?", o: ["60 minutes", "90 minutes", "Three hours", "Five hours"], a: 2, e: "The ensemble class is a three-hour session (Part D)." },
+      { q: "Which conducting patterns are taught in Month 10?", o: ["4/4, 3/4 and 6/8", "2/2 and 5/4", "7/8 and 9/8 only", "None"], a: 0, e: "Conducting and bandleading: 4/4, 3/4, 6/8 (Week 39)." },
+      { q: "Which topics belong to sound system basics?", o: ["Microphone, DI, mixer, monitor mix", "Chord voicings only", "Circle of fifths", "Qenet construction"], a: 0, e: "Week 40: microphone technique, DI, mixer, monitor mix." },
+      { q: "In the final assessment, how many marks is the final concert worth?", o: ["20", "25", "40", "10"], a: 2, e: "Final concert = 40 marks." },
+      { q: "In the final assessment, how many marks is the theory and solfège exam worth?", o: ["20", "25", "40", "5"], a: 0, e: "Theory and solfège exam = 20 marks." },
+      { q: "Which grade band is 80–89?", o: ["Distinction", "Merit", "Pass", "Repeat the unit"], a: 1, e: "90–100 Distinction · 80–89 Merit · 70–79 Pass (Chapter 6)." },
+      { q: "The chord symbol C/E means…", o: ["C major with E in the bass", "C and E major together", "C minor", "C add E"], a: 0, e: "A slash chord names the bass note (Week 14)." },
+      { q: "Which key signature has four flats?", o: ["E♭ major", "A♭ major", "D♭ major", "B♭ major"], a: 1, e: "A♭ major: B♭ E♭ A♭ D♭ (Week 17)." }
+    ] }
+  ];
+  function examShuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function examBest(id) { try { return JSON.parse(localStorage.getItem("azmari_exam_" + id) || "null"); } catch (e) { return null; } }
+  function examSave(id, v) { try { localStorage.setItem("azmari_exam_" + id, JSON.stringify(v)); } catch (e) {} }
+  function examGrade(p) { return p >= 90 ? "Distinction" : p >= 80 ? "Merit" : p >= 70 ? "Pass" : "Below pass mark · repeat the unit"; }
+  function examsTab(body) {
+    var intro = card();
+    add(intro, el("h3", "📝 Written theory exams"), el("p", "Self-check papers made from the AZMARI MUSIC ACADEMY guide book. Pass mark 70%. A score here is for practice and is not your official result: official exam scores are entered by your instructor after the live exam.", { className: "mu" }));
+    var host = el("div"); add(body, intro, host); showList();
+    function showList() {
+      clear(host);
+      EXAMS.forEach(function (x) {
+        var c = card(), b = examBest(x.id);
+        add(c, el("h3", x.title), el("p", x.qs.length + " questions · " + x.about, { className: "mu" }),
+          el("p", b ? "Best score: " + b.pct + "% · " + examGrade(b.pct) : "Not attempted yet", { className: "mu" }),
+          btn("Start exam", function () { run(x); window.scrollTo(0, 0); }));
+        host.appendChild(c);
+      });
+      var hc = card(); add(hc, el("h3", "Your saved attempts")); host.appendChild(hc);
+      sb.rpc("academy_my_exam_attempts").then(function (q) {
+        if (q.error) { hc.remove(); return; }
+        if (!q.data || !q.data.length) { hc.appendChild(el("p", "No saved attempts yet.", { className: "mu" })); return; }
+        q.data.slice(0, 8).forEach(function (a) { hc.appendChild(el("p", new Date(a.created_at).toLocaleDateString() + " · " + examTitleOf(a.exam_id) + " · " + a.right_count + "/" + a.total + " (" + Math.round(a.pct) + "%)", { className: "mu", style: "margin:2px 0" })); });
+      }, function () { hc.remove(); });
+    }
+    function run(x) {
+      clear(host);
+      var items = examShuffle(x.qs.slice()).map(function (q) { return { q: q.q, e: q.e, opts: examShuffle(q.o.map(function (t, i) { return { t: t, ok: i === q.a }; })), pick: -1 }; });
+      var head = card(), m = msg(); add(head, el("h3", x.title), el("p", "Choose one answer for every question, then press Submit.", { className: "mu" })); host.appendChild(head);
+      items.forEach(function (it, n) {
+        var c = card(), btns = [];
+        add(c, el("p", (n + 1) + ". " + it.q, { style: "font-weight:700" }));
+        function paint() { btns.forEach(function (b, k) { var on = it.pick === k; b.style.background = on ? "var(--gr)" : "transparent"; b.style.color = on ? "var(--on)" : "var(--ink)"; }); }
+        it.opts.forEach(function (o, k) {
+          var b = btn(o.t, function () { it.pick = k; paint(); }, "ln full"); b.style.textAlign = "left"; btns.push(b); c.appendChild(b);
+        });
+        host.appendChild(c);
+      });
+      var foot = card();
+      add(foot, m, btn("Submit exam", function () {
+        var open = items.filter(function (it) { return it.pick < 0; }).length;
+        if (open) { say(m, open + " question" + (open > 1 ? "s are" : " is") + " still unanswered.", true); return; }
+        finish(x, items);
+      }, "full"), btn("Cancel", showList, "ln full"));
+      host.appendChild(foot);
+    }
+    function finish(x, items) {
+      var right = items.filter(function (it) { return it.opts[it.pick].ok; }).length, pct = Math.round(right / items.length * 100), prev = examBest(x.id);
+      if (!prev || pct > prev.pct) examSave(x.id, { pct: pct, right: right, total: items.length, at: new Date().toISOString() });
+      clear(host);
+      var r = card();
+      add(r, el("h3", x.title), el("p", right + " / " + items.length + " correct · " + pct + "%", { style: "font-size:22px;font-weight:800;color:" + (pct >= 70 ? "var(--gr)" : "var(--rd)") }),
+        el("p", examGrade(pct) + " (pass mark 70%)"), el("p", "Practice result only. Your instructor records the official exam score.", { className: "mu" }),
+        btn("Try again", function () { run(x); window.scrollTo(0, 0); }), btn("Back to exams", function () { showList(); window.scrollTo(0, 0); }, "ln"));
+      host.appendChild(r);
+      var wrong = items.filter(function (it) { return !it.opts[it.pick].ok; });
+      var saveNote = el("p", "Saving your attempt…", { className: "mu" }); r.appendChild(saveNote);
+      sb.rpc("academy_submit_exam_attempt", { p_exam_id: x.id, p_right: right, p_total: items.length, p_missed: wrong.map(function (it) { return it.q; }) }).then(function (res) {
+        if (res.error) { saveNote.textContent = "Not saved to your teacher: " + res.error.message; saveNote.className = "msg err"; }
+        else { saveNote.textContent = "✓ Saved. Your teacher can see this attempt."; saveNote.style.color = "var(--gr)"; }
+      }, function () { saveNote.textContent = "Not saved: no connection."; saveNote.className = "msg err"; });
+      if (wrong.length) {
+        var w = card(); w.appendChild(el("h3", "Review your mistakes"));
+        wrong.forEach(function (it) {
+          var correct = it.opts.filter(function (o) { return o.ok; })[0].t;
+          add(w, el("p", it.q, { style: "font-weight:700;margin-bottom:2px" }), el("p", "Your answer: " + it.opts[it.pick].t, { className: "msg err", style: "min-height:0;margin:0" }), el("p", "Correct answer: " + correct, { style: "color:var(--gr);margin:0" }), el("p", it.e, { className: "mu", style: "margin:0 0 10px" }));
+        });
+        host.appendChild(w);
+      }
+      window.scrollTo(0, 0);
+    }
+  }
+  function examTitleOf(id) { var f = EXAMS.filter(function (x) { return x.id === id; })[0]; return f ? f.title.split(" · ")[0] : id; }
+  async function examResultsTab(body) {
+    var o = await overview(); if (o.err) { add(body, el("p", o.err, { className: "msg err" })); return; }
+    var names = {}; o.data.forEach(function (s) { names[s.student_no] = s.name; });
+    var who = sel([["", "All students"]].concat(o.data.map(function (s) { return [s.student_no, s.student_no + " · " + s.name]; }))), host = el("div"), m = msg();
+    var top = card(); add(top, el("h3", "📝 Student exam attempts"), el("p", "Self-check attempts students made in the portal. Tap a row to see the questions they missed. Official scores are still entered under Academy progress.", { className: "mu" }), lab("Student", who), m);
+    async function load() {
+      clear(host); say(m, "Loading…");
+      var q = await sb.rpc("academy_staff_list_exam_attempts", { p_student_no: who.value || null });
+      if (q.error) { say(m, q.error.message + " · If this is the first setup, run supabase/academy-exam-attempts.sql in the Supabase SQL Editor.", true); return; }
+      say(m, ""); var rows = q.data || [];
+      if (!rows.length) { add(host, el("p", "No attempts yet.", { className: "mu" })); return; }
+      var c = card(), t = el("table"), th = el("tr");
+      ["Date", "Student", "Exam", "Score", ""].forEach(function (h) { th.appendChild(el("th", h)); }); t.appendChild(th);
+      rows.forEach(function (r) {
+        var tr = el("tr"), ok = Number(r.pct) >= 70, det = el("tr"), cell = el("td", null, { colSpan: 5 });
+        tr.className = "click"; det.style.display = "none";
+        add(tr, el("td", new Date(r.created_at).toLocaleString()), el("td", (names[r.student_no] || "") + " · " + r.student_no), el("td", examTitleOf(r.exam_id)),
+          el("td", r.right_count + "/" + r.total + " · " + Math.round(r.pct) + "%"), el("td", ok ? "Pass" : "Below 70", { className: "pill " + (ok ? "p" : "a") }));
+        var missed = r.missed || [];
+        if (missed.length) { missed.forEach(function (qq) { cell.appendChild(el("p", "✗ " + qq, { className: "mu", style: "margin:2px 0" })); }); } else cell.appendChild(el("p", "No missed questions.", { className: "mu" }));
+        det.appendChild(cell); tr.onclick = function () { det.style.display = det.style.display === "none" ? "" : "none"; };
+        t.appendChild(tr); t.appendChild(det);
+      });
+      c.appendChild(el("div", null, { className: "scroll" })).appendChild(t); host.appendChild(c);
+    }
+    who.onchange = load; add(body, top, host); load();
+  }
+  async function academyStudentTab(body) {
+    var r = await sb.rpc("academy_my_course_progress");
+    if (r.error || !r.data) { add(body, el("p", r.error ? r.error.message : "Academy progress is not available yet. Ask the academy administrator to apply the academy-progress.sql setup file.", { className: "msg err" })); return; }
+    var d = r.data || {}, base = await sb.rpc("my_progress"), weeks = (d.completed_weeks || []).map(Number), att = base.data && base.data.attendance || {}, attended = Number(att.present || 0) + Number(att.late || 0), attendancePct = Number(att.total || 0) ? attended / Number(att.total) * 100 : 0;
+    academyProgressCard(body, weeks, d.major || "", true);
+    var cert = card(); cert.appendChild(el("h3", "🏅 Certificates"));
+    function canFinish(end, score) { for (var i=1;i<=end;i++) if (weeks.indexOf(i)<0) return false; return Number(score)>=70; }
+    function certificateButton(name, eligible, detail) { var row=el("div"); add(row,el("p",name+" — "+detail,{className:"mu"}), eligible ? btn("Print certificate",function(){printAcademyCertificate(d.name || (base.data && base.data.name) || "Student",name,d.major || "",new Date().toLocaleDateString());},"sm") : el("span","Not yet eligible",{className:"mu"})); cert.appendChild(row); }
+    certificateButton("Level 1 · Foundation of Music",canFinish(12,d.level1_exam_score),"12 weeks completed and exam score at least 70");
+    certificateButton("Level 2 · Intermediate Musicianship",canFinish(24,d.level1_exam_score)&&Number(d.level2_exam_score)>=70,"24 weeks completed, Level 1 passed and Level 2 exam at least 70");
+    certificateButton("AZMARI MUSIC ACADEMY Diploma",canFinish(48,d.level1_exam_score)&&Number(d.level2_exam_score)>=70&&Number(d.final_exam_score)>=70&&attendancePct>=80,"48 weeks completed, all required exams passed and attendance at least 80% (current "+Math.round(attendancePct)+"%)");
+    add(body, cert, el("p", "Your instructor updates this record. You cannot change or self-mark course progress.", { className: "mu" }));
+  }
+  async function academyStaffTab(body) {
+    var o = await overview(); if (o.err) { add(body, el("p", o.err, { className: "msg err" })); return; }
+    if (!o.data.length) { add(body, el("p", "No students are registered yet.", { className: "mu" })); return; }
+    var who = studentSelect(o.data), editor = el("div"), m = msg(), selected = null, completed = [];
+    var top = card(); add(top, el("h3", "Instructor progress entry"), el("p", "Select a student, review the 48-week academy plan, and mark only the weeks the instructor has verified. Students see this record read-only with red progress bars.", { className: "mu" }), lab("Student", who), m);
+    async function loadStudent() {
+      clear(editor); selected = o.data.find(function (s) { return s.student_no === who.value; });
+      var q = await sb.rpc("academy_staff_get_course_progress", { p_student_no: who.value });
+      if (q.error) { say(m, q.error.message + " · If this is the first setup, run supabase/academy-progress.sql in Supabase SQL Editor.", true); return; }
+      completed = (q.data && q.data.completed_weeks || []).map(Number);
+      var major = (selected && selected.instrument) || (q.data && q.data.major) || "";
+      var c = card(); add(c, el("h3", (selected ? selected.name : who.value) + " · " + who.value), el("p", "Major course: " + (major || "Not selected"), { className: "mu" }));
+      add(c, el("p", "Tick a week only after the instructor has assessed the student's work. This updates the student's read-only progress view.", { className: "mu" }));
+      ACADEMY_LEVELS.forEach(function (lv) {
+        c.appendChild(el("h3", lv.name, { className: "ac-level" }));
+        ACADEMY_WEEKS.filter(function (w) { return w.week >= lv.from && w.week <= lv.to; }).forEach(function (w) {
+          var line = el("label"); line.className = "ac-week";
+          var check = el("input", null, { type: "checkbox", checked: completed.indexOf(w.week) >= 0 });
+          check.onchange = function () { if (check.checked && completed.indexOf(w.week) < 0) completed.push(w.week); else completed = completed.filter(function (x) { return x !== w.week; }); };
+          add(line, check, el("span", "Week " + w.week + " — " + w.title + ". " + w.summary)); c.appendChild(line);
+        });
+      });
+      var e1 = inp("Level 1 exam score (0–100)", "number", q.data && q.data.level1_exam_score != null ? q.data.level1_exam_score : "");
+      var e2 = inp("Level 2 exam score (0–100)", "number", q.data && q.data.level2_exam_score != null ? q.data.level2_exam_score : "");
+      var ef = inp("Final diploma exam score (0–100)", "number", q.data && q.data.final_exam_score != null ? q.data.final_exam_score : "");
+      add(c, el("h3", "Instructor exam results"), lab("Level 1 exam", e1), lab("Level 2 exam", e2), lab("Final diploma exam", ef), el("p", "Enter a score only after the corresponding assessment. Certificates require a score of at least 70; the diploma also requires 80% attendance.", { className: "mu" }));
+      add(c, btn("Save instructor progress", async function () {
+        function examValue(input) { if (input.value.trim() === "") return null; var n = Number(input.value); return Number.isFinite(n) && n >= 0 && n <= 100 ? n : NaN; }
+        var v1=examValue(e1),v2=examValue(e2),vf=examValue(ef); if ([v1,v2,vf].some(function(x){return Number.isNaN(x);})) { say(m,"Exam scores must be between 0 and 100.",true); return; }
+        var save = await sb.rpc("academy_staff_set_course_progress", { p_student_no: who.value, p_major: major, p_completed_weeks: completed.sort(function (a,b) { return a-b; }), p_note: "Instructor-updated curriculum progress", p_level1_exam_score:v1, p_level2_exam_score:v2, p_final_exam_score:vf });
+        if (save.error) say(m, save.error.message, true); else say(m, "Progress saved. The student can now view the updated red progress bars.");
+      }, "full"));
+      editor.appendChild(c);
+      var prev = card(); academyProgressCard(prev, completed, major, true); editor.appendChild(prev);
+    }
+    who.onchange = loadStudent; add(body, top, editor); loadStudent();
+  }
+
+  async function sectionsTab(body) {
+    var r = await sb.rpc("my_progress");
+    var open = (r.data && r.data.access) || [];
+    var grid = el("div"); grid.className = "grid";
+    var detail = el("div");
+    SECT.forEach(function (s) {
+      var isOpen = open.indexOf(s[0]) >= 0;
+      var b = el("button"); b.type = "button"; b.className = "sec" + (isOpen ? " open" : "");
+      add(b, el("div", s[1], { style: "font-weight:700" }), el("div", isOpen ? "Unlocked" : "Locked · enter code", { className: "st" }));
+      b.onclick = function () { clear(detail); sectionDetail(detail, s, isOpen, function () { sectionsTab(clearReturn(body)); }); };
+      grid.appendChild(b);
+    });
+    add(body, el("p", "Ask your teacher for a one-time 4-digit code, tap a section and enter it.", { className: "mu" }), grid, detail);
+  }
+  function clearReturn(b) { clear(b); return b; }
+  async function sectionDetail(box, s, isOpen, refresh) {
+    var c = card(); box.appendChild(c); c.appendChild(el("h3", s[1]));
+    if (!isOpen) {
+      var code = inp("4-digit code", "tel"); code.maxLength = 4; code.inputMode = "numeric"; var m = msg();
+      add(c, code, btn("Unlock", async function () {
+        if (!/^\d{4}$/.test(code.value)) { say(m, "Enter 4 digits.", true); return; }
+        var q = await sb.rpc("my_redeem", { p_section: s[0], p_code: code.value });
+        if (q.error) { say(m, q.error.message, true); return; }
+        if (!q.data) { say(m, "Wrong or expired code.", true); return; }
+        refresh();
+      }, "full"), m);
+      return;
+    }
+    if (s[0] === "attendance") { c.appendChild(el("p", "Your attendance for today is recorded.")); return; }
+    var r = await sb.rpc("my_lessons", { p_section: s[0] });
+    var list = r.data || [];
+    if (!list.length) { c.appendChild(el("p", "Unlocked. Your teacher has not added lessons here yet.", { className: "mu" })); return; }
+    list.forEach(function (l) {
+      var row = el("div"); row.style.cssText = "padding:8px 0;border-bottom:1px solid var(--ln)";
+      var a = el("a", l.title, { href: safeUrl(l.url), target: "_blank", rel: "noopener noreferrer" });
+      add(row, a, l.description ? el("div", l.description, { className: "mu" }) : null); c.appendChild(row);
+    });
+  }
+
+  /* ---------- staff ---------- */
+  function staffView(role) {
+    clear(app); shell(role);
+    var items = [["Students", studentsTab], ["Academy progress", academyStaffTab], ["Exam papers", examsTab], ["Exam results", examResultsTab], ["Attendance", attendanceTab], ["Grades", gradesTab], ["Codes", codesTab], ["Lessons", lessonsTab]];
+    if (role === "admin") { items.unshift(["Applications", applicationsTab]); items.push(["Payments", paymentsTab], ["Register", registerTab], ["Team", teamTab]); }
+    tabbed(items);
+  }
+  async function overview() { var r = await sb.rpc("admin_overview"); return r.error ? { err: r.error.message } : { data: r.data }; }
+  function studentSelect(list) { return sel(list.map(function (s) { return [s.student_no, s.student_no + " · " + s.name]; })); }
+
+  async function studentsTab(body) {
+    var o = await overview(); if (o.err) { add(body, el("p", o.err, { className: "msg err" })); return; }
+    var c = card(), det = el("div"), t = el("table");
+    var h = el("tr"); ["ID", "Name", "Phone", "Graded", "Avg", "Attend.", "Linked"].forEach(function (x) { h.appendChild(el("th", x)); }); t.appendChild(h);
+    o.data.forEach(function (s) {
+      var tr = el("tr"); tr.className = "click";
+      [s.student_no, s.name, s.phone, s.graded + "/5", s.graded ? String(s.avg_score) : "Not graded", s.attended + "/" + s.classes, s.linked ? "Yes" : "No"].forEach(function (x) { tr.appendChild(el("td", x)); });
+      tr.onclick = function () { showDetail(det, s.student_no); }; t.appendChild(tr);
+    });
+    add(c, el("h3", o.data.length + " students"), el("p", "Tap a row for full records.", { className: "mu" }), add(el("div", null, { className: "scroll" }), t));
+    add(body, c, det);
+  }
+  async function showDetail(box, no) {
+    clear(box); var r = await sb.rpc("staff_student_detail", { p_student_no: no });
+    if (r.error || !r.data) { box.appendChild(el("p", r.error ? r.error.message : "Not found", { className: "msg err" })); return; }
+    var d = r.data, c = card();
+    add(c, el("h3", d.name + " · " + d.student_no), el("p", d.phone + " · " + (d.instrument || "") + " · " + (d.session || "") + " · " + d.status, { className: "mu" }));
+    var t = el("table"); d.grades.forEach(function (g) { var tr = el("tr"); add(tr, el("td", g.subject), el("td", g.score == null ? "Not graded" : String(g.score)), el("td", g.note || "", { className: "mu" })); t.appendChild(tr); });
+    c.appendChild(t); c.appendChild(el("h3", "Recent attendance", { style: "margin-top:12px" }));
+    if (!d.attendance.length) c.appendChild(el("p", "No attendance recorded yet.", { className: "mu" }));
+    d.attendance.forEach(function (a) {
+      var row = el("div"); add(row, el("span", a.status, { className: "pill " + a.status[0] }), el("span", " " + a.class_date + " · " + (a.subject || "General class"), { className: "mu" })); c.appendChild(row);
+    });
+    if (ME.role === "admin") {
+      var m = msg(), next = d.status === "active" ? "paused" : "active";
+      add(c, btn(next === "paused" ? "Pause student" : "Reactivate student", async function () {
+        var q = await sb.rpc("admin_set_student_status", { p_student_no: d.student_no, p_status: next });
+        if (q.error) say(m, q.error.message, true); else showDetail(box, no);
+      }, "ln sm"), m);
+    }
+    box.appendChild(c);
+  }
+
+  async function attendanceTab(body) {
+    var o = await overview(); if (o.err) { add(body, el("p", o.err, { className: "msg err" })); return; }
+    var dt = inp("", "date", new Date().toISOString().slice(0, 10)), sub = sel([["", "General class"]].concat(SUBJ)), list = el("div"), m = msg();
+    var c = card();
+    var two = el("div"); two.className = "row2"; add(two, lab("Date", dt), lab("Class", sub));
+    add(c, el("h3", "Mark attendance"), two);
+    async function draw() {
+      clear(list);
+      var q = await sb.rpc("staff_day_attendance", { p_date: dt.value, p_subject: sub.value });
+      var marked = {}; (q.data || []).forEach(function (x) { marked[x.student_no] = x.status; });
+      o.data.filter(function (s) { return s.status === "active"; }).forEach(function (s) {
+        var row = el("div"); row.style.cssText = "display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--ln);flex-wrap:wrap";
+        var cur = el("span", marked[s.student_no] || "not marked", { className: "pill " + (marked[s.student_no] ? marked[s.student_no][0] : "") });
+        add(row, el("div", s.student_no + " · " + s.name, { style: "flex:1;min-width:150px" }), cur);
+        [["present", "Present"], ["late", "Late"], ["absent", "Absent"]].forEach(function (x) {
+          row.appendChild(btn(x[1], async function () {
+            var z = await sb.rpc("admin_mark_attendance", { p_student_no: s.student_no, p_subject: sub.value, p_date: dt.value, p_status: x[0] });
+            if (z.error) say(m, z.error.message, true); else { say(m, ""); cur.textContent = x[0]; cur.className = "pill " + x[0][0]; }
+          }, "sm" + (x[0] === "late" ? " gd" : x[0] === "absent" ? " ln" : "")));
+        });
+        list.appendChild(row);
+      });
+      if (!list.children.length) list.appendChild(el("p", "No active students yet.", { className: "mu" }));
+    }
+    dt.onchange = draw; sub.onchange = draw;
+    add(body, c, m, list); draw();
+  }
+
+  async function gradesTab(body) {
+    var o = await overview(); if (o.err) { add(body, el("p", o.err, { className: "msg err" })); return; }
+    var c = card(), who = studentSelect(o.data), sub = sel(SUBJ), score = inp("0-100", "number"), note = inp("Note (optional)"), m = msg();
+    add(c, el("h3", "Record grade"), lab("Student", who), lab("Subject", sub), lab("Score (0-100)", score), lab("Note", note),
+      btn("Save grade", async function () {
+        var v = parseFloat(score.value);
+        if (isNaN(v) || v < 0 || v > 100) { say(m, "Score must be 0 to 100.", true); return; }
+        var r = await sb.rpc("admin_set_grade", { p_student_no: who.value, p_subject: sub.value, p_score: v, p_note: note.value || null });
+        say(m, r.error ? r.error.message : "Grade saved.", !!r.error);
+      }, "full"), m);
+    if (!o.data.length) c.insertBefore(el("p", "No students yet.", { className: "mu" }), c.children[1]);
+    body.appendChild(c);
+  }
+
+  async function codesTab(body) {
+    var o = await overview(); if (o.err) { add(body, el("p", o.err, { className: "msg err" })); return; }
+    var c = card(), who = studentSelect(o.data), s = sel(SECT), mins = inp("", "number", "30"), res = el("div"), m = msg();
+    res.className = "big";
+    add(c, el("h3", "One-time 4-digit code"), lab("Student", who), lab("Section", s), lab("Valid for (minutes)", mins),
+      btn("Generate code", async function () {
+        res.textContent = "";
+        var r = await sb.rpc("admin_issue_code", { p_student_no: who.value, p_section: s.value, p_valid_minutes: parseInt(mins.value, 10) || 30 });
+        if (r.error) { say(m, r.error.message, true); return; }
+        say(m, "Tell the student this code. It works once."); res.textContent = r.data;
+      }, "full"), res, m);
+    body.appendChild(c);
+  }
+
+  async function lessonsTab(body) {
+    var c = card(), s = sel(LESSON_SECT), title = inp("Lesson title"), url = inp("https://... (YouTube, Vimeo, Drive link)", "url"),
+      desc = inp("Short description (optional)"), m = msg(), list = el("div");
+    add(c, el("h3", "Add lesson or live link"), lab("Section", s), lab("Title", title), lab("Link (https only)", url), lab("Description", desc),
+      btn("Add", async function () {
+        if (!title.value.trim() || !/^https:\/\//i.test(url.value.trim())) { say(m, "Add a title and an https:// link.", true); return; }
+        var r = await sb.rpc("staff_add_lesson", { p_section: s.value, p_title: title.value, p_url: url.value, p_description: desc.value });
+        if (r.error) { say(m, r.error.message, true); return; }
+        title.value = ""; url.value = ""; desc.value = ""; say(m, "Added."); draw();
+      }, "full"), m);
+    async function draw() {
+      clear(list); var r = await sb.rpc("my_lessons", { p_section: s.value });
+      (r.data || []).forEach(function (l) {
+        var row = el("div"); row.style.cssText = "display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--ln)";
+        add(row, el("a", l.title, { href: safeUrl(l.url), target: "_blank", rel: "noopener noreferrer", style: "flex:1" }),
+          btn("Delete", async function () { if (confirm("Delete this lesson?")) { await sb.rpc("staff_delete_lesson", { p_id: l.id }); draw(); } }, "ln sm"));
+        list.appendChild(row);
+      });
+      if (!list.children.length) list.appendChild(el("p", "Nothing in this section yet.", { className: "mu" }));
+    }
+    s.onchange = draw;
+    var lc = card(); add(lc, el("h3", "In this section"), list);
+    add(body, c, lc); draw();
+  }
+
+  async function applicationsTab(body) {
+    var st = sel([["pending", "Pending"], ["approved", "Approved"], ["rejected", "Rejected"]]), list = el("div"), m = msg(), c = card();
+    add(c, el("h3", "Student applications from the app"), el("p", "Check the payment, then Approve to create the Student ID.", { className: "mu" }), lab("Show", st), m);
+    async function draw() {
+      clear(list);
+      var r = await sb.rpc("admin_list_registrations", { p_status: st.value });
+      if (r.error) { say(m, r.error.message, true); return; }
+      var rows = r.data || [];
+      if (!rows.length) list.appendChild(el("p", "Nothing here.", { className: "mu" }));
+      rows.forEach(function (x) {
+        var k = card();
+        add(k, el("h3", x.name + " · " + x.phone), el("p", [x.instrument, x.session, x.region, x.grade].filter(Boolean).join(" · "), { className: "mu" }));
+        if (x.description) k.appendChild(el("p", x.description));
+        if (x.location) k.appendChild(el("p", "Location: " + x.location, { className: "mu" }));
+        k.appendChild(el("p", "Payment reference: " + (x.payment_ref || "not entered yet") + " · " + new Date(x.created_at).toLocaleString(), { className: "mu" }));
+        if (x.status === "approved") k.appendChild(el("span", "Student ID: " + x.student_no, { className: "badge" }));
+        if (x.status === "pending") {
+          add(k, btn("Approve", async function () {
+            var q = await sb.rpc("admin_approve_registration", { p_id: x.id });
+            await draw();
+            if (q.error) say(m, q.error.message, true); else say(m, "Approved. Student ID: " + q.data + " (tell the student, they log in and link it)");
+          }, "sm"), btn("Reject", async function () {
+            if (!confirm("Reject this application?")) return;
+            var q = await sb.rpc("admin_reject_registration", { p_id: x.id });
+            await draw(); if (q.error) say(m, q.error.message, true);
+          }, "ln sm"));
+        }
+        list.appendChild(k);
+      });
+    }
+    st.onchange = draw; add(body, c, list); draw();
+  }
+
+  async function paymentsTab(body) {
+    var prod = sel([["", "All types"]]), stat = sel([["", "All statuses"], ["pending", "Pending"], ["approved", "Approved"], ["rejected", "Rejected"]]),
+      list = el("div"), sum = el("div"), m = msg(), c = card(), ALL = [];
+    add(c, el("h3", "Payments"), el("p", "Academy, band profiles, events, job seekers, store posts and rentals from the app.", { className: "mu" }), lab("Type", prod), lab("Status", stat), sum, m);
+    function pick(o, names) { for (var i = 0; i < names.length; i++) { var v = o[names[i]]; if (v != null && v !== "") return String(v); } return ""; }
+    function nice(code) {
+      var s = String(code || "").toLowerCase();
+      if (/acad|^reg/.test(s)) return "Academy";
+      if (/band/.test(s)) return "Band profile";
+      if (/event|^ev/.test(s)) return "Events";
+      if (/job|seek/.test(s)) return "Job seeker";
+      if (/store|item|rent|sale|post/.test(s)) return "Store post";
+      return code ? String(code) : "Other";
+    }
+    function status(o) { var s = pick(o, ["status", "state"]).toLowerCase(); return s || "pending"; }
+    var SHOWN = ["id", "product_code", "status", "state", "reference", "item_ref", "created_at", "name", "phone", "amount", "price", "total", "paid_at", "payment_time", "method"];
+    async function load() {
+      var r = await sb.rpc("admin_list_orders", { p_limit: 300 });
+      if (r.error) { say(m, r.error.message, true); return; }
+      ALL = r.data || [];
+      var keep = prod.value, seen = {};
+      clear(prod); prod.appendChild(el("option", "All types", { value: "" }));
+      ALL.forEach(function (o) { var k = pick(o, ["product_code"]); if (k && !seen[k]) { seen[k] = 1; prod.appendChild(el("option", nice(k) + " (" + k + ")", { value: k })); } });
+      prod.value = keep; draw();
+    }
+    function draw() {
+      clear(list); clear(sum);
+      var rows = ALL.filter(function (o) {
+        return (!prod.value || pick(o, ["product_code"]) === prod.value) && (!stat.value || status(o) === stat.value);
+      });
+      var by = {};
+      rows.forEach(function (o) { var k = nice(pick(o, ["product_code"])), s = status(o); by[k] = by[k] || {}; by[k][s] = (by[k][s] || 0) + 1; });
+      Object.keys(by).forEach(function (k) {
+        sum.appendChild(el("p", k + ": " + Object.keys(by[k]).map(function (s) { return by[k][s] + " " + s; }).join(" · "), { className: "mu" }));
+      });
+      if (!rows.length) list.appendChild(el("p", "No payments match.", { className: "mu" }));
+      rows.forEach(function (o) {
+        var k = card(), st = status(o), code = pick(o, ["product_code"]);
+        add(k, el("h3", nice(code) + (pick(o, ["item_ref"]) ? " · " + pick(o, ["item_ref"]) : "")));
+        var who = [pick(o, ["name"]), pick(o, ["phone"])].filter(Boolean).join(" · ");
+        if (who) k.appendChild(el("p", who));
+        var amt = pick(o, ["amount", "price", "total"]);
+        k.appendChild(el("p", "Reference: " + (pick(o, ["reference"]) || "none") + (amt ? " · " + amt + " birr" : ""), { className: "mu" }));
+        var when = pick(o, ["paid_at", "payment_time", "created_at"]);
+        if (when) k.appendChild(el("p", new Date(when).toString() === "Invalid Date" ? when : new Date(when).toLocaleString(), { className: "mu" }));
+        var extra = Object.keys(o).filter(function (key) { return SHOWN.indexOf(key) < 0 && o[key] != null && o[key] !== "" && String(o[key]).length < 90; })
+          .map(function (key) { return key + ": " + o[key]; }).join(" · ");
+        if (extra) k.appendChild(el("p", extra, { className: "mu", style: "font-size:12px" }));
+        k.appendChild(el("span", st, { className: "badge" }));
+        if (st === "pending" && o.id != null) {
+          add(k, btn("Approve", async function () { await decide(o, true); }, "sm"), btn("Reject", async function () { if (confirm("Reject this payment?")) await decide(o, false); }, "ln sm"));
+        }
+        list.appendChild(k);
+      });
+    }
+    async function decide(o, ok) {
+      var q = await sb.rpc("admin_decide_order", { p_key: String(o.id), p_approve: ok });
+      if (q.error) { say(m, q.error.message, true); return; }
+      say(m, ok ? "Approved." : "Rejected."); await load();
+    }
+    prod.onchange = draw; stat.onchange = draw;
+    add(body, c, list); load();
+  }
+
+  /* ---------- admin ---------- */
+  function registerTab(body) {
+    var c = card(), n = inp("Full name"), p = inp("Phone (09...)", "tel"), i = inp("Instrument"), ses = sel([["Evening", "Evening"], ["Morning", "Morning"], ["Weekend", "Weekend"]]), m = msg(), out = el("div");
+    out.className = "big";
+    add(c, el("h3", "Register student"), lab("Full name", n), lab("Phone", p), lab("Instrument", i), lab("Session", ses),
+      btn("Create Student ID", async function () {
+        if (n.value.trim().length < 2 || p.value.replace(/\D/g, "").length < 9) { say(m, "Enter a name and a valid phone.", true); return; }
+        var r = await sb.rpc("admin_enroll", { p_name: n.value, p_phone: p.value, p_instrument: i.value, p_session: ses.value });
+        if (r.error) { say(m, r.error.message, true); return; }
+        say(m, "Give this ID to the student. They log in, then link it."); out.textContent = r.data; out.style.letterSpacing = "2px";
+      }, "full"), out, m);
+    body.appendChild(c);
+  }
+  async function teamTab(body) {
+    var c = card(), email = inp("teacher@example.com", "email"), role = sel([["teacher", "Teacher"], ["admin", "Admin"], ["none", "Remove access"]]), m = msg(), list = el("div");
+    add(c, el("h3", "Give a role"), el("p", "The person must create an account first (Create account on the login page).", { className: "mu" }),
+      lab("Email", email), lab("Role", role),
+      btn("Save role", async function () {
+        var r = await sb.rpc("admin_set_role", { p_email: email.value, p_role: role.value });
+        if (r.error) { say(m, r.error.message, true); return; }
+        say(m, "Saved."); email.value = ""; draw();
+      }, "full"), m);
+    async function draw() {
+      clear(list); var r = await sb.rpc("admin_list_staff");
+      (r.data || []).forEach(function (x) { var row = el("div"); add(row, el("span", x.role, { className: "badge" }), el("span", " " + x.email)); row.style.padding = "5px 0"; list.appendChild(row); });
+    }
+    var lc = card(); add(lc, el("h3", "Staff"), list);
+    add(body, c, lc); draw();
+  }
+
+  /* ---------- start ---------- */
+  async function boot() {
+    var s = await sb.auth.getSession();
+    if (!s.data.session) { authView(); return; }
+    var r = await sb.rpc("my_role");
+    if (r.error) { authView("Could not load your role. Make sure the v2 SQL was run. " + r.error.message); return; }
+    ME = r.data;
+    if (ME.role === "student") studentView();
+    else if (ME.role === "admin" || ME.role === "teacher") staffView(ME.role);
+    else claimView();
+  }
+  boot();
+})();
+</script>  <script src="../academy-progress.js"></script>
+</body></html>
